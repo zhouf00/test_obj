@@ -2,8 +2,9 @@ from django.db import models
 # 1、基表
 class BaseModel(models.Model):
 
-    is_delete = models.BooleanField(default=1)
+    is_delete = models.BooleanField(default=0)
     create_time = models.DateTimeField(auto_now_add=True)
+    update_time = models.DateTimeField(auto_now=True)
 
     # 作为基表的Model不能 数据库中形成对的表、设置abstract = True
     class Meta:

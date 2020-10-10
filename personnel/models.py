@@ -1,7 +1,9 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, Group
+from django.contrib.auth.models import AbstractUser
 
 from utils.basemodel import BaseModel
+from rbac import models as rbac_models
+
 # Create your models here.
 
 
@@ -19,18 +21,31 @@ class User(AbstractUser):
     avatar = models.URLField(blank=True,verbose_name='头像链接')
     main_department = models.IntegerField(default=0, verbose_name='主部门')
 
+    roles = models.ManyToManyField(
+        rbac_models.Role,
+        db_constraint=False,
+        related_name='user',
+        blank=True
+    )
+
     department = models.ManyToManyField(
         to='Structure',
-        # db_constraint=False,
+        db_constraint=False,
         related_name='user',
-        through='UserToStructure'
     )
 
     leader_dept = models.ManyToManyField(
         to='Structure',
-        # db_constraint=False,
+        db_constraint=False,
         related_name='leader',
-        through='UserleaderToStructure'
+        blank=True
+    )
+
+    project = models.ForeignKey(
+        to='engineering.Project',
+        on_delete=models.CASCADE,
+        related_name='builders',
+        blank=True, null=True
     )
 
     def __str__(self):
@@ -64,15 +79,3 @@ class Structure(BaseModel):
         db_table = 'departments'
         verbose_name = '部门表'
         verbose_name_plural = verbose_name
-
-
-class UserToStructure(BaseModel):
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, db_constraint=False)
-    structure = models.ForeignKey(Structure, to_field='deptid', on_delete=models.CASCADE, db_constraint=False)
-
-
-class UserleaderToStructure(BaseModel):
-
-    user = models.ForeignKey(User, on_delete=models.CASCADE, db_constraint=False)
-    structure = models.ForeignKey(Structure, to_field='deptid', on_delete=models.CASCADE ,db_constraint=False)

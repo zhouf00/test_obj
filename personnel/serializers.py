@@ -1,49 +1,181 @@
 import re
+import datetime
 from rest_framework import serializers
+from rest_framework_jwt.settings import api_settings
 
-from django.contrib.auth.models import Group
 from personnel import models
+from rbac.serializers import RoleModelSerializer
+
+jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 
-class UserModelSerializer(serializers.ModelSerializer):
+class LoginModelSerializer(serializers.ModelSerializer):
 
     # 自定义序列化属性
     # isleader_in_dept = serializers.
 
-
-    userid = serializers.CharField(write_only=True) # 企业微信ID
+    # userid = serializers.CharField(write_only=True) # 企业微信ID
     # department = serializers.ListField(write_only=True) # 企业微信部门
-    is_leader_in_dept = serializers.ListField(write_only=True) # 企业微信是否为部门领导
+    # is_leader_in_dept = serializers.ListField(write_only=True) # 企业微信是否为部门领导
+    usr = serializers.CharField(write_only=True)
+    pwd = serializers.CharField(write_only=True)
 
     class Meta:
         model = models.User
         fields = [
-            # 前台输入字段
-            'userid', 'is_leader_in_dept',
             # 数据库字段
-            'username', 'name', 'mobile', 'gender', 'email', 'avatar', 'is_active', 'leader_dept',
-            'main_department', 'department'
+            'username', 'usr', 'pwd', 'mobile', #'last_login'
         ]
         extra_kwargs = {
             'username':{
                 'read_only': True
             },
-            'leader_dept': {
+            'mobile': {
                 'read_only': True
             },
+            # 'last_login':{
+            #     'required': False
+            # }
         }
 
     def validate(self, attrs):
-        attrs['username'] = attrs.pop('userid')
-        attrs['depts'] = attrs.pop('department')
-        attrs['leader_dept'] = []
-        if len(attrs['depts']) != len(attrs['is_leader_in_dept']):
-            raise serializers.ValidationError({'data': '部门有误'})
-        for i in range(len(attrs['depts'])):
-            if attrs['is_leader_in_dept'][i]:
-                attrs['leader_dept'].append(attrs['depts'][i])
-        attrs.pop('is_leader_in_dept')
+        print('内部打印', attrs)
+        usr = attrs.pop('usr')
+        pwd = attrs.pop('pwd')
+        user_query = models.User.objects.filter(username=usr)
+        user_obj = user_query.first()
+        if user_obj and user_obj.check_password(pwd):
+            # 签发token，将token存放到，实例化类对象中
+            payload = jwt_payload_handler(user_obj)
+            self.token = jwt_encode_handler(payload)
+            # 将当前用户与签发的token都保存在序列化对象中
+            self.user = user_obj
+            # 写入最后登陆时间
+            attrs['last_login'] = datetime.datetime.today()
+            print(attrs)
+            return attrs
+        raise serializers.ValidationError({'data': '数据有误'})
+
+
+class AuthModelSerializer(serializers.ModelSerializer):
+
+    usr = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = models.User
+        fields = ['username', 'usr', 'avatar']
+        extra_kwargs = {
+            'username': {
+                'read_only': True
+            },
+            'roles': {
+                'required': False
+            }
+        }
+
+    def validate(self, attrs):
+        print('内部打印', attrs)
+        usr = attrs.pop('usr')
+        user_query = models.User.objects.filter(username=usr)
+        user_obj = user_query.first()
+        if user_obj:
+            # 签发token，将token存放到，实例化类对象中
+            payload = jwt_payload_handler(user_obj)
+            self.token = jwt_encode_handler(payload)
+            # 将当前用户与签发的token都保存在序列化对象中
+            self.user = user_obj
+            # 写入最后登陆时间
+            attrs['last_login'] = datetime.datetime.today()
+            # 默认给普通用户权限
+            return attrs
+        raise serializers.ValidationError({'errmsg': '数据有误或帐号不存在'})
+
+
+class AuthCreateUserModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.User
+        fields = ['username', 'mobile', 'name', 'is_active', 'roles',
+                  'avatar', 'gender']
+
+    def validate(self, attrs):
+        attrs['is_active'] = True
+        attrs['roles'] = [2]
         return attrs
+
+
+class LogoutModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.User
+
+    def validate(self, attrs):
+        self.token = None
+        return attrs
+
+
+class UserModelSerializer(serializers.ModelSerializer):
+
+    roles = RoleModelSerializer(many=True)
+    status = serializers.SerializerMethodField()
+
+    def get_status(self, obj):
+        if obj.is_active:
+            return 1
+        else:
+            return 0
+
+    class Meta:
+        model = models.User
+        fields = ['id', 'username', 'mobile', 'name', 'last_login', 'status', 'gender', 'roles', 'avatar',
+                  'is_active', 'password', 'email']
+        extra_kwargs = {
+            'is_active': {
+                'write_only': True
+            }
+        }
+
+
+class CreateUserModelSerializer(serializers.ModelSerializer):
+
+    def create(self, validated_data):
+        user = super().create(validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
+    class Meta:
+        model = models.User
+        fields = ['username', 'mobile', 'name', 'password', 'is_active']
+
+
+class UpdateUserModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.User
+        fields = ['id', 'username', 'mobile', 'name', 'password', 'is_active']
+
+
+class UpdateStatusModelSerializer(serializers.ModelSerializer):
+
+    status = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = models.User
+        fields = ['id', 'status', 'is_active']
+        extra_kwargs = {
+            'is_active': {
+                'write_only': True
+            }
+        }
+
+
+class UserListModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.User
+        fields = ['id', 'name', 'project']
 
 
 class DeptListSerializer(serializers.ListSerializer):

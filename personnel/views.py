@@ -1,37 +1,156 @@
+from django.dispatch import receiver
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, mixins
-from rest_framework.response import Response
+from rest_framework.filters import SearchFilter
+from django_filters.rest_framework import DjangoFilterBackend
 
 from personnel import models, serializers
+from rbac import models as rbac_models
 from utils.my_modelview import MyModelViewSet
+from utils.response import APIResponse
+from utils.my_request import MyRequest
+
+from utils.authentications import JWTAuthentication
+
+
+class LoginAPIView(APIView):
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):
+        # 拿到前台登录信息，交给序列化类，规则：帐号用usr传，密码用pwd传
+        user_obj =models.User.objects.filter(username=request.data['usr']).first()
+        print(user_obj)
+        print(type(request.data), request.data)
+        user_ser = serializers.LoginModelSerializer(instance=user_obj, data=request.data)
+        # 序列化类校验得到登录用户与token存放在序列化对象中
+        user_ser.is_valid(raise_exception=True)
+        user_ser.save()
+        # 取出登录用户与token返回给前台
+        return APIResponse(
+            data_msg='post ok',
+            token=user_ser.token,
+            results=serializers.LoginModelSerializer(user_ser.user).data
+        )
+
+
+class LogoutAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+
+    def post(self, request, *args, **kwargs):
+        user_ser = serializers.LogoutModelSerializer(request.user, many=False)
+        # user_ser = serializers.LoginModelSerializer(data=request.data)
+        # user_ser.token = None
+        user_ser.is_valid(raise_exception=True)
+        return APIResponse(
+            data_msg='logout'
+        )
+
+
+class auth2APIView(APIView):
+
+    authentication_classes = []
+    permission_classes = []
+
+    def post(self, request, *args, **kwargs):
+        print(request.data)
+        auth_requests = MyRequest()
+        userId = auth_requests.get_user(request.data['code'])
+        user_obj =models.User.objects.filter(username=userId['usr']).first()
+        print(user_obj)
+        if user_obj:
+            print('用户存在')
+            user_ser = serializers.AuthModelSerializer(instance=user_obj, data=userId)
+            # 序列化类校验得到登录用户与token存放在序列化对象中
+            user_ser.is_valid(raise_exception=True)
+            user_ser.save()
+        else:
+            print('用户不存在')
+            userInfo = auth_requests.get_info(userId['usr'])
+            print(userInfo)
+            user_create = serializers.AuthCreateUserModelSerializer(data=userInfo)
+            user_create.is_valid(raise_exception=True)
+            user_create.save()
+            user_obj = models.User.objects.filter(username=userId['usr']).first()
+            user_ser = serializers.AuthModelSerializer(instance=user_obj, data=userId)
+            # 序列化类校验得到登录用户与token存放在序列化对象中
+            user_ser.is_valid(raise_exception=True)
+            user_ser.save()
+        return APIResponse(
+            data_status=userId['errcode'],
+            data_msg=userId['errmsg'],
+            token=user_ser.token,
+            results=serializers.AuthModelSerializer(user_ser.user).data
+        )
+
 
 class UserViewSet(ModelViewSet):
+
+    # queryset = models.User.objects.all()
+    # serializer_class = serializers.UserModelSerializer
+    authentication_classes = [JWTAuthentication]
+
+    def info(self, request, *args, **kwargs):
+        # 拿到前台登录信息，交给序列化类，规则：帐号用usr传，密码用pwd传
+        # 序列化类校验得到登录用户与token存放在序列化对象中
+        # 取出登录用户与token返回给前
+
+        user = serializers.UserModelSerializer(request.user, many=False).data
+        # menu_list = [menu for role in user['roles'] for menu in role['permissions']]
+
+        menu_list = []
+        for role in user['roles']:
+            for menu in role['permissions']:
+                if menu['url'] not in menu_list:
+                    menu_list.append(menu['url'])
+            role.pop('permissions')
+        user['menus'] = menu_list
+        return APIResponse(
+            data_msg='get ok',
+            results=user
+        )
+
+
+class UserinfoViewSet(ModelViewSet):
 
     queryset = models.User.objects.all()
     serializer_class = serializers.UserModelSerializer
 
-
-class DeptViewSet(ModelViewSet, MyModelViewSet):
-    # 未完成群改功能
-    queryset = models.Structure.objects.all()
-    serializer_class = serializers.DeptModelSerializer
-
-    def my_post(self, request, *args, **kwargs):
-        serializer = serializers.DeptModelSerializer(data=request.data, many=True)
-        serializer.is_valid(raise_exception=True)
-        self.perform_create(serializer)
-        headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, headers=headers)
-
-    def my_patch(self, request, *args, **kwargs):
-        instance, request_data = self.get_myinstance(request, *args, **kwargs)
-        serializer = serializers.DeptModelSerializer(instance=instance, data=request.data, partial=False, many=True)
-        serializer.is_valid(raise_exception=True)
-        # self.perform_update(serializer)
-
-        return Response({
-            'status': 1,
-            'msg': '成功'
-        })
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields =['username', 'name']
 
 
+class CreateUserViewSet(ModelViewSet):
+
+    queryset = models.User.objects.exclude(id=1)
+    serializer_class = serializers.CreateUserModelSerializer
+
+
+class UpdateUserViewSet(ModelViewSet):
+
+    queryset = models.User.objects.exclude(id=1)
+    serializer_class = serializers.UpdateUserModelSerializer
+
+
+class UpdateStatusViewSet(ModelViewSet):
+
+    queryset = models.User.objects.exclude(id=1)
+    serializer_class = serializers.UpdateStatusModelSerializer
+
+    def my_update(self, request, *args, **kwargs):
+        status = request.data.get('status')
+        if status:
+            request.data['is_active'] = True
+        else:
+            request.data['is_active'] = False
+        super().update(request, *args, **kwargs)
+        return APIResponse(
+            data_msg='post ok',
+            results=request.data
+        )
+
+
+class UserListViewSet(ModelViewSet):
+
+    queryset = models.User.objects.exclude(id=1)
+    serializer_class = serializers.UserListModelSerializer
