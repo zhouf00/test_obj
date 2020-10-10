@@ -25,7 +25,7 @@ class MyModelViewSet:
             except:
                 print('报错')
                 continue
-        print(objs)
+        # print(objs)
         # print(objs2)
         print(new_request_data)
         return objs, new_request_data
