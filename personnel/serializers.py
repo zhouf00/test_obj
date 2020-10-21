@@ -13,11 +13,6 @@ jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 class LoginModelSerializer(serializers.ModelSerializer):
 
     # 自定义序列化属性
-    # isleader_in_dept = serializers.
-
-    # userid = serializers.CharField(write_only=True) # 企业微信ID
-    # department = serializers.ListField(write_only=True) # 企业微信部门
-    # is_leader_in_dept = serializers.ListField(write_only=True) # 企业微信是否为部门领导
     usr = serializers.CharField(write_only=True)
     pwd = serializers.CharField(write_only=True)
 
@@ -34,9 +29,6 @@ class LoginModelSerializer(serializers.ModelSerializer):
             'mobile': {
                 'read_only': True
             },
-            # 'last_login':{
-            #     'required': False
-            # }
         }
 
     def validate(self, attrs):
@@ -53,9 +45,8 @@ class LoginModelSerializer(serializers.ModelSerializer):
             self.user = user_obj
             # 写入最后登陆时间
             attrs['last_login'] = datetime.datetime.today()
-            print(attrs)
             return attrs
-        raise serializers.ValidationError({'data': '数据有误'})
+        raise serializers.ValidationError({'msg': '数据有误'})
 
 
 class AuthModelSerializer(serializers.ModelSerializer):

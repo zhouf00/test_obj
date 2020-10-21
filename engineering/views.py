@@ -30,8 +30,19 @@ class ProjectCreateViewSet(ModelViewSet):
     serializer_class = serializers.CreateProjectModelSerializer
 
     def create(self, request, *args, **kwargs):
-        print(request)
         super().create(request,*args, **kwargs)
+
+
+class CollectorViewSet(ModelViewSet):
+
+    queryset = models.Collector.objects.all()
+    serializer_class = serializers.CollectorModelSerializer
+
+
+class AisleViewSet(ModelViewSet):
+
+    queryset = models.Aisle.objects.all()
+    serializer_class = serializers.AisleModelSerializer
 
 
 class ProjectManufacturerViewSet(ModelViewSet):

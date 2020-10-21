@@ -96,15 +96,14 @@ class UserViewSet(ModelViewSet):
         # 取出登录用户与token返回给前
 
         user = serializers.UserModelSerializer(request.user, many=False).data
-        # menu_list = [menu for role in user['roles'] for menu in role['permissions']]
 
-        menu_list = []
-        for role in user['roles']:
-            for menu in role['permissions']:
-                if menu['url'] not in menu_list:
-                    menu_list.append(menu['url'])
-            role.pop('permissions')
-        user['menus'] = menu_list
+        # menu_list = []
+        # for role in user['roles']:
+        #     for menu in role['permissions']:
+        #         if menu['url'] not in menu_list:
+        #             menu_list.append(menu['url'])
+        #     role.pop('permissions')
+        # user['menus'] = menu_list
         return APIResponse(
             data_msg='get ok',
             results=user
@@ -113,7 +112,7 @@ class UserViewSet(ModelViewSet):
 
 class UserinfoViewSet(ModelViewSet):
 
-    queryset = models.User.objects.all()
+    queryset = models.User.objects.exclude(id=1)
     serializer_class = serializers.UserModelSerializer
 
     filter_backends = [SearchFilter, DjangoFilterBackend]

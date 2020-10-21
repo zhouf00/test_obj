@@ -17,10 +17,13 @@ class CreateProjectModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Project
         fields = ['id', 'is_delete', 'name', 'address', 'sn', 'area', 'manufacturers', 'entrance_time',
-                  'status', 'priority', 'monitor_type', 'type', 'builders']
+                  'status', 'priority', 'monitor_type', 'type', 'builders', 'manager']
 
     def validate(self, attrs):
         print(attrs)
+        sn = attrs['sn']
+        if models.Project.objects.filter(sn=sn):
+            raise serializers.ValidationError({'msg': '该编号已经存在'})
         return attrs
 
 
@@ -70,6 +73,13 @@ class CollectorModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Collector
+        fields = ['id', 'title', 'model', 'image', 'memo', 'aisle', 'aisleInfo']
+
+
+class AisleModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Aisle
         fields = '__all__'
 
 
@@ -135,7 +145,7 @@ class ProjectModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Project
         fields = ['id', 'is_delete', 'name', 'area', 'priority', 'address', 'sn', 'status',
-                  'update_time', 'entrance_time', 'finish_time', 'facility_count',
+                  'update_time', 'entrance_time', 'finish_time', 'facility_count', 'manager',
                   'manufacturers', 'builders', 'facility', 'server', 'monitor_type']
 
         extra_kwargs = {

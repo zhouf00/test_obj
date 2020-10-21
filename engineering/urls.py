@@ -15,5 +15,13 @@ urlpatterns = [
     # url(r'^detail/(?P<pk>.*)/$', views.DetailViewSet.as_view({'get': 'retrieve', 'put': 'update'})),
     url(r'^server/$', views.ServerViewSet.as_view({'get': 'list', 'post': 'create'})),
     # url(r'^facility/$', views.FacilityViewSet.as_view({'get':'list',})),
-    url(r'^facility/(?P<pk>.*)/$', views.FacilityViewSet.as_view({'get':'retrieve'}))
+    url(r'^facility/(?P<pk>.*)/$', views.FacilityViewSet.as_view({'get':'retrieve'})),
+
+    # 公司设备管理url
+    url(r'^CoFaciliy/$', views.CollectorViewSet.as_view({'get': 'list'})),
+    url(r'^CoFaciliy/create/$', views.CollectorViewSet.as_view({'post':'create'})),
+    url(r'^CoFaciliy/aisle/$', views.AisleViewSet.as_view({'get':'list'})),
+    url(r'^CoFaciliy/aisle/create/$', views.AisleViewSet.as_view({'post':'create'})),
+
+    # 发货
 ]
