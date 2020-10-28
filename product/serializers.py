@@ -24,6 +24,12 @@ class ProductionModelSerializer(serializers.ModelSerializer):
         fields = ['id', 'sn', 'facility', 'sw', 'ip', 'memo', 'product', 'lifecycle', 'project',
                   'productInfo', 'lifecycleInfo']
 
+    def validate(self, attrs):
+        sn = attrs['sn']
+        if len(models.Production.objects.filter(sn=sn)) > 0:
+            raise serializers.ValidationError({'msg': '此sn已经存在'})
+        return attrs
+
 
 #########
 # 标签

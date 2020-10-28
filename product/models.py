@@ -64,7 +64,7 @@ class Production(BaseModel):
         blank=True, null=True,
     )
     product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='production')
-    sn = models.CharField(max_length=32, unique=True, verbose_name='产品编号')
+    sn = models.CharField(max_length=32, blank=True, null=True, verbose_name='产品编号')
     facility = models.CharField(max_length=64, blank=True, null=True, verbose_name='绑定设备')
     sw = models.CharField(max_length=32, blank=True, null=True, verbose_name='嵌入式版本')
     ip = models.TextField(blank=True, null=True, verbose_name='采集器IP')

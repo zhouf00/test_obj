@@ -62,6 +62,10 @@ class Project(BaseModel):
         return self.monitor_type.values('id', 'title')
 
     @property
+    def monitorNumberList(self):
+        return self.number.values('title','number')
+
+    @property
     def buildersList(self):
         return self.builders.values('id','name')
 
@@ -91,6 +95,7 @@ class Project(BaseModel):
     class Meta:
         verbose_name = '项目'
         verbose_name_plural = verbose_name
+
 
 
 # 机房设备
@@ -354,3 +359,18 @@ class StockFinish(models.Model):
     class Meta:
         verbose_name = '库存完成与否'
         verbose_name_plural = verbose_name
+
+
+class MonitorNumber(models.Model):
+
+    project = models.ForeignKey(
+        to='Project', on_delete=models.CASCADE, related_name='number',
+        blank=True, null=True,
+    )
+    title = models.CharField(max_length=64, verbose_name='监测类型名称')
+    number = models.SmallIntegerField(verbose_name='监测数量')
+
+    class Meta:
+        verbose_name = '监测类型数量'
+        verbose_name_plural = verbose_name
+

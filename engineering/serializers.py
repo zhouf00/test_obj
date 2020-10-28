@@ -55,7 +55,7 @@ class ProjectModelSerializer(serializers.ModelSerializer):
         fields = ['id', 'is_delete', 'name', 'address', 'sn', 'update_time', 'entrance_time', 'finish_time',
                   'facility_count', 'manager', #'manufacturers', 'builders', 'facility', 'area',  'status',
                   'monitortypeList', 'typeInfo', 'statusInfo', 'areaInfo', 'working_envInfo', 'buildersList',
-                  'manufacturersList']
+                  'manufacturersList', 'monitorNumberList']
 
         extra_kwargs = {
             'is_delete': {
@@ -140,3 +140,10 @@ class StockFinishModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.StockFinish
         fields = ['id', 'title']
+
+
+class MonitorNumberModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.MonitorNumber
+        fields = ['id', 'project', 'title', 'number']

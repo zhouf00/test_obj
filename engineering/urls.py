@@ -45,6 +45,9 @@ urlpatterns = [
     url(r'^projectTag/StockFinish/$', views.StockViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^projectTag/StockFinish/update/(?P<pk>.*)/$', views.StockViewSet.as_view({'post': 'update'})),
 
+    url(r'^projectTag/monitornumber/$', views.MonitorNumberViewSet.as_view({'get': 'list', 'post': 'create'})),
+    url(r'^projectTag/monitornumber/update/(?P<pk>.*)/$', views.MonitorNumberViewSet.as_view({'post': 'update'})),
+
     # 图片上传
     url(r'^invoice/img/$', views.InvoiceImageViewSet.as_view({'get': 'list'})),
     url(r'^invoice/upload/$', views.InvoiceImageViewSet.as_view({'post': 'create'})),

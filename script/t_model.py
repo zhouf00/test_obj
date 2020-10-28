@@ -6,6 +6,7 @@ django.setup()
 from engineering.models import Project, Manufacturer
 from personnel import models
 from rbac.models import Menu, Role, Auth
+from product import models as product_models
 
 # user = models.User.objects.filter(pk=2)[0]
 # print([var['title'] for var in user.roles.values()])
@@ -18,5 +19,7 @@ from rbac.models import Menu, Role, Auth
 # print(models.User.objects.all())
 # print(Auth.objects.filter(user__name='测试用户2').values())
 # print(Menu.objects.filter(parent=None))
-print(dict(models.Structure.objects.values_list('deptid', 'name')))
-print(models.Structure.objects.values('user'))
+# print(dict(models.Structure.objects.values_list('deptid', 'name')))
+# print(models.Structure.objects.values('user'))
+if len(product_models.Production.objects.filter(sn=1234)) == 0:
+    print('没有')

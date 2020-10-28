@@ -111,3 +111,12 @@ class StockFinishViewSet(ModelViewSet):
 
     queryset = models.StockFinish.objects.all()
     serializer_class = serializers.StockModelSerializer
+
+
+class MonitorNumberViewSet(ModelViewSet):
+
+    queryset = models.MonitorNumber.objects.all()
+    serializer_class = serializers.MonitorNumberModelSerializer
+
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ['project__id']
