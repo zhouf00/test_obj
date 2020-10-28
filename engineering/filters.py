@@ -15,7 +15,37 @@ from django_filters.rest_framework.filterset import FilterSet
 from django_filters import filters
 class ProjectFilterSet(FilterSet):
 
+    area = filters.CharFilter(field_name='area__title')
 
     class Meta:
         model = models.Project
         fields = ['id', 'name', 'area', 'sn']
+
+
+class IdcRoomFilterSet(FilterSet):
+
+    project = filters.CharFilter(field_name='project__id')
+
+    class Meta:
+        model = models.IdcRoom
+        fields = ['project']
+
+
+class StockFilterSet(FilterSet):
+
+    project = filters.CharFilter(field_name='project__id')
+
+    class Meta:
+        model = models.Stock
+        fields = ['project']
+
+
+class InvoiceFilterSet(FilterSet):
+
+    project = filters.CharFilter(field_name='project__id')
+
+    class Meta:
+        model = models.Invoice
+        fields = ['project']
+
+

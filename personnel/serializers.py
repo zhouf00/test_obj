@@ -108,24 +108,10 @@ class LogoutModelSerializer(serializers.ModelSerializer):
 
 class UserModelSerializer(serializers.ModelSerializer):
 
-    roles = RoleModelSerializer(many=True)
-    status = serializers.SerializerMethodField()
-
-    def get_status(self, obj):
-        if obj.is_active:
-            return 1
-        else:
-            return 0
-
     class Meta:
         model = models.User
-        fields = ['id', 'username', 'mobile', 'name', 'last_login', 'status', 'gender', 'roles', 'avatar',
+        fields = ['id', 'username', 'mobile', 'name', 'last_login', 'gender', 'avatar',
                   'is_active', 'password', 'email']
-        extra_kwargs = {
-            'is_active': {
-                'write_only': True
-            }
-        }
 
 
 class CreateUserModelSerializer(serializers.ModelSerializer):
@@ -136,25 +122,22 @@ class CreateUserModelSerializer(serializers.ModelSerializer):
         user.save()
         return user
 
+    def update(self, instance, validated_data):
+        user = super().update(instance, validated_data)
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
     class Meta:
         model = models.User
         fields = ['username', 'mobile', 'name', 'password', 'is_active']
 
 
-class UpdateUserModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.User
-        fields = ['id', 'username', 'mobile', 'name', 'password', 'is_active']
-
-
 class UpdateStatusModelSerializer(serializers.ModelSerializer):
 
-    status = serializers.CharField(write_only=True)
-
     class Meta:
         model = models.User
-        fields = ['id', 'status', 'is_active']
+        fields = ['id', 'is_active']
         extra_kwargs = {
             'is_active': {
                 'write_only': True
@@ -166,7 +149,7 @@ class UserListModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.User
-        fields = ['id', 'name', 'project']
+        fields = ['id','username', 'name', 'project', 'department']
 
 
 class DeptListSerializer(serializers.ListSerializer):
@@ -176,6 +159,13 @@ class DeptListSerializer(serializers.ListSerializer):
         return instance
 
 
+class DeptListModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Structure
+        fields = ['id', 'deptid', 'name', 'parentid', 'order', 'user']
+
+
 class DeptModelSerializer(serializers.ModelSerializer):
 
     id = serializers.IntegerField(write_only=True)
@@ -183,21 +173,16 @@ class DeptModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Structure
         list_serializer_class = DeptListSerializer
-        fields = ['id',
-                  'deptid', 'name', 'parentid', 'order']
+        fields = ['id', 'deptid', 'name', 'parentid', 'order']
         extra_kwargs = {
             'deptid':{
                 'required': False
-            },
-            'parentid': {
-                'required': False
-            },
+            }
         }
 
     def validate(self, attrs):
-        # print(attrs)
         if models.Structure.objects.filter(deptid=attrs['id']):
-            raise serializers.ValidationError({'data': '部门已存在'})
+            raise serializers.ValidationError({'msg': '部门已存在'})
         attrs['deptid'] = attrs.pop('id')
         print(attrs)
         return attrs

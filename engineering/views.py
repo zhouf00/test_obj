@@ -21,7 +21,6 @@ class ProjectViewSet(ModelViewSet):
     pagination_class = MyPageNumberPagination
     filter_class = filters.ProjectFilterSet
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    search_fields =['id', 'name', 'area', 'sn']
 
 
 class ProjectCreateViewSet(ModelViewSet):
@@ -29,20 +28,15 @@ class ProjectCreateViewSet(ModelViewSet):
     queryset = models.Project.objects.all()
     serializer_class = serializers.CreateProjectModelSerializer
 
-    def create(self, request, *args, **kwargs):
-        super().create(request,*args, **kwargs)
 
+class IdcRoomViewSet(ModelViewSet):
 
-class CollectorViewSet(ModelViewSet):
+    queryset = models.IdcRoom.objects.all()
+    serializer_class = serializers.IdcRoomModelSerializer
 
-    queryset = models.Collector.objects.all()
-    serializer_class = serializers.CollectorModelSerializer
-
-
-class AisleViewSet(ModelViewSet):
-
-    queryset = models.Aisle.objects.all()
-    serializer_class = serializers.AisleModelSerializer
+    pagination_class = MyPageNumberPagination
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    filter_class = filters.IdcRoomFilterSet
 
 
 class ProjectManufacturerViewSet(ModelViewSet):
@@ -51,56 +45,69 @@ class ProjectManufacturerViewSet(ModelViewSet):
     serializer_class = serializers.ManufacturerModelSerializer
 
 
+class StockViewSet(ModelViewSet):
+
+    queryset = models.Stock.objects.all()
+    serializer_class = serializers.StockModelSerializer
+
+    pagination_class = MyPageNumberPagination
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    filter_class = filters.StockFilterSet
+
+
+class InvoiceViewSet(ModelViewSet):
+
+    queryset = models.Invoice.objects.all().order_by('-create_time')
+    serializer_class = serializers.InvoiceModelSerializer
+
+    pagination_class = MyPageNumberPagination
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    filter_class = filters.InvoiceFilterSet
+
+
+class InvoiceImageViewSet(ModelViewSet):
+
+    queryset = models.InvoiceImage.objects.all()
+    serializer_class = serializers.InvoiceImageModelSerializer
+
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ['invoice__id']
+
+
+######
+# 标签组
+#####
 class MonitorTypeViewSet(ModelViewSet):
 
     queryset = models.MonitorType.objects.all()
     serializer_class = serializers.MonitorTypeModelSerializer
 
 
-class DetailViewSet(ModelViewSet):
-    """详情页面数据"""
-    queryset = models.Project.objects.filter(is_delete=False)
-    serializer_class = serializers.DetailModelSerializer
+class ProjectTypeViewSet(ModelViewSet):
 
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    search_fields =['id', 'name']
+    queryset = models.ProjectType.objects.all()
+    serializer_class = serializers.ProjectTypeModelSerializer
 
 
-class ServerViewSet(ModelViewSet):
-    """服务器数据"""
-    queryset = models.Server.objects.filter(is_delete=False)
-    serializer_class = serializers.ServerModelSerializer
+class ProjectStatusViewSet(ModelViewSet):
 
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    search_fields =['project']
+    queryset = models.ProjectStatus.objects.all()
+    serializer_class = serializers.ProjectStatusModelSerializer
 
 
-class CpuViewSet(ModelViewSet):
+class ProjectAreaViewSet(ModelViewSet):
 
-    queryset = models.CPU.objects.filter(is_delete=False)
-    serializer_class = serializers.CpuModelSerializer
-
-
-class RamViewSet(ModelViewSet):
-
-    queryset = models.RAM.objects.filter(is_delete=False)
-    serializer_class = serializers.RamModelSerializer
+    queryset = models.ProjectArea.objects.all()
+    serializer_class = serializers.ProjectAreaModelSerializer
 
 
-class DiskViewSet(ModelViewSet):
+class ProjectWorkingEnvViewSet(ModelViewSet):
 
-    queryset = models.Disk.objects.filter(is_delete=False)
-    serializer_class = serializers.DiskModelSerializer
-
-
-class NicViewSet(ModelViewSet):
-
-    queryset = models.NIC.objects.filter(is_delete=False)
-    serializer_class = serializers.NicModelSerializer
+    queryset = models.ProjectWorkingEnv.objects.all()
+    serializer_class = serializers.ProjectWorkingEnvModelSerializer
 
 
-class FacilityViewSet(ModelViewSet):
-    """风机数据"""
-    queryset = models.Facility.objects.filter(is_delete=False)
-    serializer_class = serializers.FacilityModelSerializer
+class StockFinishViewSet(ModelViewSet):
 
+    queryset = models.StockFinish.objects.all()
+    serializer_class = serializers.StockModelSerializer

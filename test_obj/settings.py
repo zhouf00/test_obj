@@ -49,6 +49,7 @@ INSTALLED_APPS = [
     'personnel.apps.PersonnelConfig',       # 人员管理
     'engineering.apps.EngineeringConfig',   # 工程中心
     'rbac.apps.RbacConfig',                 # 前台菜单权限
+    'product.apps.ProductConfig'            # 产品管理
 ]
 
 MIDDLEWARE = [

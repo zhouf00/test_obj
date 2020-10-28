@@ -5,6 +5,13 @@ from engineering import models
 from personnel.serializers import UserModelSerializer
 
 
+class MachineModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Machine
+        fields = '__all__'
+
+
 class ManufacturerModelSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -12,141 +19,43 @@ class ManufacturerModelSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class IdcRoomModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.IdcRoom
+        fields = "__all__"
+
+    def validate(self, attrs):
+        print(attrs)
+        return attrs
+
+
 class CreateProjectModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Project
-        fields = ['id', 'is_delete', 'name', 'address', 'sn', 'area', 'manufacturers', 'entrance_time',
-                  'status', 'priority', 'monitor_type', 'type', 'builders', 'manager']
+        fields = ['id', 'is_delete', 'name', 'address', 'sn', 'area', 'manufacturers', 'entrance_time','facility_count',
+                  'status', 'monitor_type', 'type', 'builders', 'manager', 'working_env']
 
     def validate(self, attrs):
-        print(attrs)
         sn = attrs['sn']
-        if models.Project.objects.filter(sn=sn):
+        if sn and models.Project.objects.filter(sn=sn):
             raise serializers.ValidationError({'msg': '该编号已经存在'})
+        elif not sn:
+            attrs.pop('sn')
+        print(attrs)
         return attrs
-
-
-class CpuModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.CPU
-        fields = '__all__'
-
-
-class RamModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.RAM
-        fields = '__all__'
-
-
-class DiskModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.Disk
-        fields = '__all__'
-
-
-class NicModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.NIC
-        fields = '__all__'
-
-
-class ServerModelSerializer(serializers.ModelSerializer):
-
-    cpu = CpuModelSerializer(many=False, read_only=True)
-    ram = RamModelSerializer(many=True, read_only=True)
-    disk = DiskModelSerializer(many=True, read_only=True)
-    nic = NicModelSerializer(many=True, read_only=True)
-
-    class Meta:
-        model = models.Server
-        fields = ['id', 'is_delete', 'server_type', 'brand', 'model', 'os_type', 'os_release',
-                  'accounts', 'passwd', 'place', 'project',
-                  'cpu', 'ram', 'disk', 'nic']
-
-
-class CollectorModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.Collector
-        fields = ['id', 'title', 'model', 'image', 'memo', 'aisle', 'aisleInfo']
-
-
-class AisleModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.Aisle
-        fields = '__all__'
-
-
-class SensorModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.Sensor
-        fields = '__all__'
-
-
-class FacilitySensorModelSerializer(serializers.ModelSerializer):
-
-    sensor_type = SensorModelSerializer(many=False, read_only=True)
-
-    class Meta:
-        model = models.FacilitySensor
-        fields = '__all__'
-
-
-class FacilityCollectorModelSerializer(serializers.ModelSerializer):
-
-    sensor = FacilitySensorModelSerializer(many=True, read_only=True)
-    collector_type = CollectorModelSerializer(many=False, read_only=True)
-
-    class Meta:
-        model = models.FacilityCollector
-        fields = '__all__'
-
-
-class MachineModelSerializer(serializers.ModelSerializer):
-
-    manufacturer = ManufacturerModelSerializer(many=False, read_only=True)
-
-    class Meta:
-        model = models.Machine
-        fields = '__all__'
-
-
-class MonitorTypeModelSerializer(serializers.ModelSerializer):
-
-    class Meta:
-        model = models.MonitorType
-        fields = ['id', 'title']
-
-
-class FacilityModelSerializer(serializers.ModelSerializer):
-    """设备"""
-    collector = FacilityCollectorModelSerializer(many=True, read_only=True)
-    machine = MachineModelSerializer(many=False, read_only=True)
-
-    class Meta:
-        model = models.Facility
-        fields = '__all__'
 
 
 class ProjectModelSerializer(serializers.ModelSerializer):
 
-    manufacturers = ManufacturerModelSerializer(many=True)
-    builders = UserModelSerializer(many=True)
-    facility = FacilityModelSerializer(many=True)
-    monitor_type = MonitorTypeModelSerializer(many=True)
 
     class Meta:
         model = models.Project
-        fields = ['id', 'is_delete', 'name', 'area', 'priority', 'address', 'sn', 'status',
-                  'update_time', 'entrance_time', 'finish_time', 'facility_count', 'manager',
-                  'manufacturers', 'builders', 'facility', 'server', 'monitor_type']
+        fields = ['id', 'is_delete', 'name', 'address', 'sn', 'update_time', 'entrance_time', 'finish_time',
+                  'facility_count', 'manager', #'manufacturers', 'builders', 'facility', 'area',  'status',
+                  'monitortypeList', 'typeInfo', 'statusInfo', 'areaInfo', 'working_envInfo', 'buildersList',
+                  'manufacturersList']
 
         extra_kwargs = {
             'is_delete': {
@@ -164,33 +73,70 @@ class ProjectModelSerializer(serializers.ModelSerializer):
         }
 
 
-class DetailModelSerializer(serializers.ModelSerializer):
-
-    # 引入其它序列化数据
-    server = ServerModelSerializer(many=True, read_only=True)
-    facility = FacilityModelSerializer(many=True, read_only=True)
-
-    # 重写to_representation方法，进行数据的过滤
-    def to_representation(self, obj):
-        data = super(DetailModelSerializer, self).to_representation(obj)
-        data['server'] = self._filter(
-            ServerModelSerializer,
-            models.Server.objects.filter(is_delete=False, project=obj.id)
-        )
-        data['facility'] = self._filter(
-            FacilityModelSerializer,
-            models.Facility.objects.filter(is_delete=False, project=obj.id)
-        )
-        return data
+class StockModelSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = models.Project
-        fields = ['id', 'create_time', 'name', 'is_delete', 'address', 'sn', 'status', 'image', 'memo',
-                   'server', 'facility', 'manu_list']
+        model = models.Stock
+        fields = ['id', 'title', 'type', 'totality', 'delivered', 'undelivered', 'update_time', 'finish',
+                  'project', 'typeInfo', 'finishInfo']
 
-    # 自定义过滤方法
-    def _filter(self, ser, obj):
-        temp_list = []
-        for var in obj:
-            temp_list.append(ser(var).data)
-        return temp_list
+
+class InvoiceModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Invoice
+        fields = ['id', 'title', 'type', 'count', 'memo', 'project', 'user', 'create_time','img',
+                  'userInfo']
+        extra_kwargs = {
+            'img': {
+                'required': False
+            },
+        }
+
+
+class InvoiceImageModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.InvoiceImage
+        fields = ['id', 'title', 'image', 'invoice']
+
+
+######
+# 标签组
+#####
+class MonitorTypeModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.MonitorType
+        fields = ['id', 'title']
+
+class ProjectTypeModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.ProjectType
+        fields = ['id', 'title']
+
+
+class ProjectStatusModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProjectStatus
+        fields = ['id', 'title']
+
+
+class ProjectAreaModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProjectArea
+        fields = ['id', 'title']
+
+
+class ProjectWorkingEnvModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProjectWorkingEnv
+        fields = ['id', 'title']
+
+
+class StockFinishModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.StockFinish
+        fields = ['id', 'title']

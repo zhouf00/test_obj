@@ -65,3 +65,18 @@ class MyRequest:
             user = userid['UserId'] if ('UserId' in userid) else userid['OpenId']
             return user
         return None
+
+
+class TestRequest:
+
+    def get_token(self):
+        ID = 'wwa84b8b2c3e83d6e0'
+        SECRET = 'Kge63NyTYnG-1ZS98uzs6FPQsOxDEF6xqDVVEaQz1mM'
+        _url = 'https://qyapi.weixin.qq.com/cgi-bin/gettoken?corpid={ID}&corpsecret={SECRET}'
+        result = requests.get(_url.format(ID=ID, SECRET=SECRET)).json()
+        return result
+
+    def get_department(self, access_token, Id=None):
+        _url = 'https://qyapi.weixin.qq.com/cgi-bin/department/list?access_token={ACCESS_TOKEN}'
+        result = requests.get(_url.format(ACCESS_TOKEN=access_token)).json()
+        return result

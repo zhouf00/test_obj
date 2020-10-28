@@ -26,6 +26,7 @@ urlpatterns = [
     url(r'^back/', include('backend.urls')),
     url(r'^personnel/', include('personnel.urls')),
     url(r'^engineering/', include('engineering.urls')),
+    url(r'^product/', include('product.urls')),
     url(r'^rbac/', include('rbac.urls')),
 
     url(r'^media/(?P<path>.*)', serve, {'document_root': settings.MEDIA_ROOT})

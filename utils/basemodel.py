@@ -1,4 +1,5 @@
 from django.db import models
+from datetime import datetime
 # 1、基表
 class BaseModel(models.Model):
 
@@ -12,5 +13,5 @@ class BaseModel(models.Model):
 
 
 def upload_path_image(instance, filename):
-
-    return '/'.join([str(instance.name), 'img', filename])
+    # print('/'.join([datetime.today().strftime("%Y%m%d"), 'img', filename]))
+    return '/'.join([datetime.today().strftime("%Y%m%d"), 'img', filename])

@@ -13,21 +13,13 @@ class MenuModelSerializer(serializers.ModelSerializer):
 
 class RoleModelSerializer(serializers.ModelSerializer):
 
+
     class Meta:
         model = models.Role
-        fields = ['id', 'title','memo','leader_list', 'leader','status', 'user_list']
-        extra_kwargs = {
-            'leader': {
-                'write_only': True,
-                'required': False
-            },
-            'leader_list': {
-                'read_only': True,
-            },
-            'user_list': {
-                'read_only':True
-            },
-        }
+        fields = ['id', 'title','memo','leaders_list','status', 'user_list', 'leaders']
 
-    def validate(self, attrs):
-        return attrs
+class AuthModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Auth
+        fields = ['id', 'user', 'userName', 'role', 'memo', 'menu']

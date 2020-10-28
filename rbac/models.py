@@ -1,7 +1,6 @@
 from django.db import models
 
 from utils.basemodel import BaseModel
-from personnel import models as user_models
 # Create your models here.
 
 class Menu(BaseModel):
@@ -25,31 +24,40 @@ class Menu(BaseModel):
         verbose_name = '菜单'
         verbose_name_plural = verbose_name
 
+
+class Auth(models.Model):
+
+    role = models.SmallIntegerField(verbose_name='管理员角色')
+    memo = models.TextField(blank=True, null=True, verbose_name='备注')
+
+    user = models.OneToOneField(
+        to='personnel.User',
+        on_delete=models.CASCADE,
+        to_field='username',
+        related_name='auth'
+    )
+
+    menu = models.ManyToManyField(
+        to=Menu,
+        db_constraint=False,
+        related_name='auth',
+    )
+
+    @property
+    def userName(self):
+        return self.user.name
+
+    class Meta:
+        verbose_name = '权限表'
+        verbose_name_plural = verbose_name
+
+
 class Role(BaseModel):
     """
     角色：绑定权限
     """
     title = models.CharField(max_length=32, verbose_name='角色名称',unique=True)
-    status = models.BooleanField(default=True, verbose_name='是否开启')
     memo = models.TextField(blank=True, null=True, verbose_name='描述')
-    leader = models.CharField(validators=[],max_length=30, blank=True, null=True)
-    permissions = models.ManyToManyField(
-        to='Menu',
-        db_constraint=False,
-        related_name='role'
-    )
-
-    @property
-    def user_list(self):
-        return self.user.values('id', 'name')
-
-    @property
-    def leader_list(self):
-        return list(map(int,self.leader.split(',')))
-
-    @property
-    def menus(self):
-        return self.permissions.values('id', 'title')
 
     def __str__(self):
         return self.title
@@ -57,3 +65,5 @@ class Role(BaseModel):
     class Meta:
         verbose_name = '角色'
         verbose_name_plural = verbose_name
+
+

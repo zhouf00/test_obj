@@ -1,6 +1,5 @@
-from django.dispatch import receiver
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet, mixins
+from rest_framework.viewsets import ModelViewSet, mixins, GenericViewSet
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
@@ -86,8 +85,6 @@ class auth2APIView(APIView):
 
 class UserViewSet(ModelViewSet):
 
-    # queryset = models.User.objects.all()
-    # serializer_class = serializers.UserModelSerializer
     authentication_classes = [JWTAuthentication]
 
     def info(self, request, *args, **kwargs):
@@ -97,20 +94,13 @@ class UserViewSet(ModelViewSet):
 
         user = serializers.UserModelSerializer(request.user, many=False).data
 
-        # menu_list = []
-        # for role in user['roles']:
-        #     for menu in role['permissions']:
-        #         if menu['url'] not in menu_list:
-        #             menu_list.append(menu['url'])
-        #     role.pop('permissions')
-        # user['menus'] = menu_list
         return APIResponse(
             data_msg='get ok',
             results=user
         )
 
 
-class UserinfoViewSet(ModelViewSet):
+class UserInfoViewSet(ModelViewSet):
 
     queryset = models.User.objects.exclude(id=1)
     serializer_class = serializers.UserModelSerializer
@@ -125,23 +115,18 @@ class CreateUserViewSet(ModelViewSet):
     serializer_class = serializers.CreateUserModelSerializer
 
 
-class UpdateUserViewSet(ModelViewSet):
-
-    queryset = models.User.objects.exclude(id=1)
-    serializer_class = serializers.UpdateUserModelSerializer
-
-
-class UpdateStatusViewSet(ModelViewSet):
+class UpdateStatusViewSet(GenericViewSet, mixins.UpdateModelMixin):
 
     queryset = models.User.objects.exclude(id=1)
     serializer_class = serializers.UpdateStatusModelSerializer
 
     def my_update(self, request, *args, **kwargs):
-        status = request.data.get('status')
-        if status:
-            request.data['is_active'] = True
-        else:
-            request.data['is_active'] = False
+        print(request.data)
+        # status = request.data.get('status')
+        # if status:
+        #     request.data['is_active'] = True
+        # else:
+        #     request.data['is_active'] = False
         super().update(request, *args, **kwargs)
         return APIResponse(
             data_msg='post ok',
@@ -153,3 +138,15 @@ class UserListViewSet(ModelViewSet):
 
     queryset = models.User.objects.exclude(id=1)
     serializer_class = serializers.UserListModelSerializer
+
+
+class DeptListViewSet(GenericViewSet, mixins.ListModelMixin):
+
+    queryset = models.Structure.objects.all()
+    serializer_class = serializers.DeptListModelSerializer
+
+
+class DeptViewSet(ModelViewSet):
+
+    queryset = models.Structure.objects.all()
+    serializer_class = serializers.DeptModelSerializer
