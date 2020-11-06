@@ -9,10 +9,13 @@ class Project(BaseModel):
     name = models.CharField(max_length=64, unique=True, verbose_name='项目名称')
     priority = models.SmallIntegerField(default=1, verbose_name='优先级')
     address = models.CharField(max_length=64, verbose_name='项目地址')
-    sn = models.CharField(max_length=64, blank=True, null=True, verbose_name='内部项目编号')
+    pj_sn = models.CharField(max_length=64, blank=True, null=True, verbose_name='项目编号')
+    sn = models.CharField(max_length=64, blank=True, null=True, verbose_name='内部编号')
     facility_count = models.IntegerField(default=0, verbose_name='设备数量')
     contractor = models.CharField(max_length=64, blank=True, null=True, verbose_name='承包商')
     manager = models.CharField(max_length=64, blank=True, null=True, verbose_name='项目负责人')
+    province = models.CharField(max_length=64, blank=True, null=True, verbose_name='省份')
+    user_car = models.CharField(max_length=64, blank=True, null=True, verbose_name='项目负责人')
 
     image = models.ImageField(upload_to=upload_path_image, default='img/default.jpg', blank=True, null=True,
                               verbose_name='默认图片')
@@ -75,19 +78,19 @@ class Project(BaseModel):
 
     @property
     def typeInfo(self):
-        return self.type.info
+        return self.type.info if self.type else {}
 
     @property
     def areaInfo(self):
-        return self.area.info
+        return self.area.info if self.area else {}
 
     @property
     def statusInfo(self):
-        return self.status.info
+        return self.status.info if self.status else {}
 
     @property
     def working_envInfo(self):
-        return self.working_env.info
+        return self.working_env.info if self.working_env else {}
 
     def __str__(self):
         return '%s' % (self.name)
@@ -216,6 +219,29 @@ class InvoiceImage(models.Model):
     class Meta:
         verbose_name = '发货图片'
         verbose_name_plural = verbose_name
+
+
+class ProjectTrace(BaseModel):
+
+    content = models.TextField(verbose_name='内容')
+
+    project = models.ForeignKey(
+        to='Project', on_delete=models.CASCADE, related_name='trace',
+        blank=True, null=True,
+    )
+    user = models.ForeignKey(
+        to='personnel.User', on_delete=models.CASCADE, related_name='trace',
+        blank=True, null=True,
+    )
+
+    @property
+    def userInfo(self):
+        return self.user.info
+
+    class Meta:
+        verbose_name = '项目跟踪情况'
+        verbose_name_plural = verbose_name
+
 
 
 class EventLog(BaseModel):

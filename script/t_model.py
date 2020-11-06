@@ -12,8 +12,7 @@ from product import models as product_models
 # print([var['title'] for var in user.roles.values()])
 # print(Menu.objects.filter(user.roles.all()))
 
-# if Project.objects.filter(sn=35):
-#     print('该编号已经存在')
+print(len(Project.objects.filter(sn='0092'))==1)
 
 # print(Project.objects.filter(builders=2))
 # print(models.User.objects.all())
@@ -21,5 +20,5 @@ from product import models as product_models
 # print(Menu.objects.filter(parent=None))
 # print(dict(models.Structure.objects.values_list('deptid', 'name')))
 # print(models.Structure.objects.values('user'))
-if len(product_models.Production.objects.filter(sn=1234)) == 0:
-    print('没有')
+# if len(product_models.Production.objects.filter(sn=1234)) == 0:
+#     print('没有')

@@ -2,7 +2,6 @@ import datetime
 from rest_framework import serializers
 
 from engineering import models
-from personnel.serializers import UserModelSerializer
 
 
 class MachineModelSerializer(serializers.ModelSerializer):
@@ -26,7 +25,6 @@ class IdcRoomModelSerializer(serializers.ModelSerializer):
         fields = "__all__"
 
     def validate(self, attrs):
-        print(attrs)
         return attrs
 
 
@@ -34,16 +32,26 @@ class CreateProjectModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Project
-        fields = ['id', 'is_delete', 'name', 'address', 'sn', 'area', 'manufacturers', 'entrance_time','facility_count',
+        fields = ['id', 'is_delete', 'name', 'address', 'sn', 'area', 'manufacturers', 'entrance_time',
+                  'facility_count', 'pj_sn','province', 'user_car','memo',
                   'status', 'monitor_type', 'type', 'builders', 'manager', 'working_env']
 
     def validate(self, attrs):
+        # print(attrs)
         sn = attrs['sn']
-        if sn and models.Project.objects.filter(sn=sn):
-            raise serializers.ValidationError({'msg': '该编号已经存在'})
+        pj_sn = attrs['pj_sn']
+        if self.instance:
+            id = self.instance.id
+        else:
+            id = None
+        if sn and len(sn) < 4:
+            attrs['sn'] = sn.zfill(4)
         elif not sn:
             attrs.pop('sn')
-        print(attrs)
+        if sn and models.Project.objects.filter(sn=attrs['sn']).exclude(id=id):
+            raise serializers.ValidationError({'msg': '该内部编号已经存在'})
+        if pj_sn and models.Project.objects.filter(sn=pj_sn).exclude(id=id):
+            raise serializers.ValidationError({'msg': '该项目编号已经存在'})
         return attrs
 
 
@@ -52,10 +60,13 @@ class ProjectModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Project
-        fields = ['id', 'is_delete', 'name', 'address', 'sn', 'update_time', 'entrance_time', 'finish_time',
-                  'facility_count', 'manager', #'manufacturers', 'builders', 'facility', 'area',  'status',
-                  'monitortypeList', 'typeInfo', 'statusInfo', 'areaInfo', 'working_envInfo', 'buildersList',
-                  'manufacturersList', 'monitorNumberList']
+        fields = [
+            'id', 'is_delete', 'name', 'address', 'sn', 'update_time', 'entrance_time', 'finish_time',
+            'facility_count', 'manager', 'memo', 'pj_sn',
+            # 自定义信息
+            'monitortypeList', 'typeInfo', 'statusInfo', 'areaInfo', 'working_envInfo', 'buildersList',
+             'manufacturersList', 'monitorNumberList'
+        ]
 
         extra_kwargs = {
             'is_delete': {
@@ -99,6 +110,13 @@ class InvoiceImageModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.InvoiceImage
         fields = ['id', 'title', 'image', 'invoice']
+
+
+class ProjectTraceModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.ProjectTrace
+        fields = ['create_time', 'content', 'user', 'project', 'userInfo']
 
 
 ######
@@ -147,3 +165,5 @@ class MonitorNumberModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.MonitorNumber
         fields = ['id', 'project', 'title', 'number']
+
+

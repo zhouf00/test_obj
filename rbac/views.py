@@ -27,7 +27,7 @@ class AuthViewSet(ModelViewSet):
     filter_backends = [SearchFilter, DjangoFilterBackend]
 
 
-class RoleViewSet(ModelViewSet):
+class AuthChangeViewSet(ModelViewSet):
 
-    queryset = models.Role.objects.all()
-    serializer_class = serializers.RoleModelSerializer
+    queryset = models.Auth.objects.all()
+    serializer_class = serializers.AuthChangeModelSerializer

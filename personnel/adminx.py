@@ -3,7 +3,7 @@ from xadmin.plugins.auth import UserAdmin
 from . import models
 
 class MyUserAdmin(UserAdmin):
-    list_display = ['username', 'mobile', 'name', 'gender', 'main_department', 'department', 'leader_dept']
+    list_display = ['username', 'mobile', 'name', 'gender', 'main_department', 'department',]
     list_filter = ['is_superuser', 'is_active']
 
 

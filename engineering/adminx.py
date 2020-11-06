@@ -1,5 +1,4 @@
 import xadmin
-
 from . import models
 
 class ProjectAdmin(object):
@@ -20,3 +19,5 @@ xadmin.site.register(models.Machine)
 xadmin.site.register(models.MonitorType)
 xadmin.site.register(models.StockFinish)
 
+#
+xadmin.site.register(models.ProjectStatus)

@@ -8,9 +8,27 @@ class Menu(BaseModel):
     菜单：页面路径
     """
     title = models.CharField(max_length=32, unique=True, verbose_name='菜单名')
-    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, verbose_name='父菜单')
+    parent = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, verbose_name='父菜单',
+                               related_name='children')
     icon = models.CharField(max_length=50, null=True, blank=True, verbose_name='图标')
-    url = models.CharField(max_length=128, unique=True, null=True, blank=True, verbose_name='路径')
+    url = models.CharField(max_length=128, null=True, blank=True, verbose_name='路径')
+    name = models.CharField(max_length=64, null=True, blank=True, verbose_name='前端名称')
+
+    role = models.ForeignKey(
+        to='Auth',
+        on_delete=models.CASCADE,
+        related_name='menu',
+        blank=True, null=True
+    )
+
+    @property
+    def parentInfo(self):
+        return {
+            'title':self.parent.title
+        }
+    @property
+    def childrenList(self):
+        return self.children.values('id', 'title')
 
     def __str__(self):
         title_list = [self.title]
@@ -27,43 +45,24 @@ class Menu(BaseModel):
 
 class Auth(models.Model):
 
-    role = models.SmallIntegerField(verbose_name='管理员角色')
+    title = models.CharField(max_length=32, verbose_name='管理员角色')
     memo = models.TextField(blank=True, null=True, verbose_name='备注')
 
-    user = models.OneToOneField(
+    user = models.ManyToManyField(
         to='personnel.User',
-        on_delete=models.CASCADE,
-        to_field='username',
-        related_name='auth'
-    )
-
-    menu = models.ManyToManyField(
-        to=Menu,
         db_constraint=False,
         related_name='auth',
+        blank=True, null=True
     )
 
     @property
-    def userName(self):
-        return self.user.name
+    def userList(self):
+        return self.user.values('id', 'name')
+
+    @property
+    def menuList(self):
+        return self.menu.values('id', 'title')
 
     class Meta:
         verbose_name = '权限表'
         verbose_name_plural = verbose_name
-
-
-class Role(BaseModel):
-    """
-    角色：绑定权限
-    """
-    title = models.CharField(max_length=32, verbose_name='角色名称',unique=True)
-    memo = models.TextField(blank=True, null=True, verbose_name='描述')
-
-    def __str__(self):
-        return self.title
-
-    class Meta:
-        verbose_name = '角色'
-        verbose_name_plural = verbose_name
-
-

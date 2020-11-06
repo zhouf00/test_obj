@@ -9,6 +9,8 @@ urlpatterns = [
     url(r'^project/create/$', views.ProjectCreateViewSet.as_view({'post': 'create'})),
     url(r'^project/updateInfo/(?P<pk>.*)/$', views.ProjectCreateViewSet.as_view({'get': 'retrieve', 'post': 'update'})),
 
+    url(r'^trace/$', views.ProjectTraceViewSet.as_view({'get': 'list', 'post':'create'})),
+
 
     # 机房信息
     url(r'^idcroom/$', views.IdcRoomViewSet.as_view({'get': 'list'})),

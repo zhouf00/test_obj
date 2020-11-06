@@ -13,7 +13,7 @@ from utils.pagenations import MyPageNumberPagination
 
 class ProjectViewSet(ModelViewSet):
     """项目列表数据"""
-    queryset = models.Project.objects.filter(is_delete=False).order_by()
+    queryset = models.Project.objects.filter(is_delete=False).order_by('id')
     serializer_class = serializers.ProjectModelSerializer
     # permission_classes = [IsAuthenticated]
     # authentication_classes = [JWTAuthentication]
@@ -25,13 +25,13 @@ class ProjectViewSet(ModelViewSet):
 
 class ProjectCreateViewSet(ModelViewSet):
 
-    queryset = models.Project.objects.all()
+    queryset = models.Project.objects.all().order_by('id')
     serializer_class = serializers.CreateProjectModelSerializer
 
 
 class IdcRoomViewSet(ModelViewSet):
 
-    queryset = models.IdcRoom.objects.all()
+    queryset = models.IdcRoom.objects.all().order_by('id')
     serializer_class = serializers.IdcRoomModelSerializer
 
     pagination_class = MyPageNumberPagination
@@ -47,7 +47,7 @@ class ProjectManufacturerViewSet(ModelViewSet):
 
 class StockViewSet(ModelViewSet):
 
-    queryset = models.Stock.objects.all()
+    queryset = models.Stock.objects.all().order_by('id')
     serializer_class = serializers.StockModelSerializer
 
     pagination_class = MyPageNumberPagination
@@ -72,6 +72,16 @@ class InvoiceImageViewSet(ModelViewSet):
 
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields = ['invoice__id']
+
+
+class ProjectTraceViewSet(ModelViewSet):
+
+    queryset = models.ProjectTrace.objects.all()
+    serializer_class = serializers.ProjectTraceModelSerializer
+
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields = ['project__id']
+
 
 
 ######

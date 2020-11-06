@@ -1,3 +1,4 @@
+# _*_ coding: utf-8 _*_
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -7,18 +8,13 @@ from utils.basemodel import BaseModel, upload_path_image
 
 class User(AbstractUser):
 
-    GENDER_LIST = (
-        (0, ''),
-        (1, '男'),
-        (2, '女')
-    )
-
-    mobile = models.CharField(max_length=11, unique=True, verbose_name='手机')
+    mobile = models.CharField(max_length=11, blank=True, null=True, verbose_name='手机')
     name = models.CharField(blank=True, max_length=32, verbose_name='中文名')
     gender = models.SmallIntegerField(default=1, verbose_name='性别')
-    avatar = models.URLField(default='https://timgsa.baidu.com/timg?image&quality=80&size=b9999_10000&sec=1603364145011&di=010785ee75fa3669ca415d95ce401ce0&imgtype=0&src=http%3A%2F%2Fc-ssl.duitang.com%2Fuploads%2Fitem%2F201902%2F01%2F20190201234537_SEZMN.thumb.400_0.jpeg',
+    avatar = models.URLField(default='https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2866953378,474015488&fm=11&gp=0.jpg',
                              verbose_name='头像链接')
     main_department = models.IntegerField(default=0, verbose_name='主部门')
+    position = models.CharField(max_length=32, blank=True, null=True, verbose_name='岗位名称')
 
     department = models.ManyToManyField(
         to='Structure',
@@ -35,10 +31,25 @@ class User(AbstractUser):
     )
 
     @property
+    def menus(self):
+        list = self.auth.values('menu__name')
+        # print(list)
+        menu = [ var['menu__name'] for var in list if var['menu__name'] ]
+        return menu
+
+    @property
+    def roleList(self):
+        list = self.auth.values('id', 'title')
+        role = [ var['title'] for var in list ]
+        return role
+
+    @property
     def info(self):
         return {
             'id': self.id,
-            'name': self.name
+            'name': self.name,
+            'username':self.username,
+            'avatar': self.avatar
         }
 
     def __str__(self):

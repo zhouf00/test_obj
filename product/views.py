@@ -9,7 +9,7 @@ from utils.pagenations import MyPageNumberPagination
 
 class ProductViewSet(ModelViewSet):
 
-    queryset = models.Product.objects.all().order_by()
+    queryset = models.Product.objects.all().order_by('id')
     serializer_class = serializers.ProductModelSerializer
 
     pagination_class = MyPageNumberPagination
@@ -17,7 +17,7 @@ class ProductViewSet(ModelViewSet):
 
 class ProductionViewSet(ModelViewSet):
 
-    queryset = models.Production.objects.all()
+    queryset = models.Production.objects.all().order_by('id')
     serializer_class = serializers.ProductionModelSerializer
 
     pagination_class = MyPageNumberPagination

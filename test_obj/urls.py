@@ -21,13 +21,13 @@ from django.conf import settings
 import xadmin
 
 urlpatterns = [
-    url(r'^xadmin/', xadmin.site.urls),
+    url(r'^api/xadmin/', xadmin.site.urls),
 
-    url(r'^back/', include('backend.urls')),
-    url(r'^personnel/', include('personnel.urls')),
-    url(r'^engineering/', include('engineering.urls')),
-    url(r'^product/', include('product.urls')),
-    url(r'^rbac/', include('rbac.urls')),
+    url(r'^api/back/', include('backend.urls')),
+    url(r'^api/personnel/', include('personnel.urls')),
+    url(r'^api/engineering/', include('engineering.urls')),
+    url(r'^api/product/', include('product.urls')),
+    url(r'^api/rbac/', include('rbac.urls')),
 
-    url(r'^media/(?P<path>.*)', serve, {'document_root': settings.MEDIA_ROOT})
+    url(r'^api/media/(?P<path>.*)', serve, {'document_root': settings.MEDIA_ROOT})
 ]

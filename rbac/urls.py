@@ -9,6 +9,5 @@ urlpatterns = [
     url(r'^role/$', views.AuthViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^updaterole/(?P<pk>.*)/$', views.AuthViewSet.as_view({'post': 'update'})),
 
-    # url(r'^auth/$', views.AuthViewSet.as_view({'get': 'list', 'post': 'create'})),
-    # url(r'^updateauth/(?P<pk>.*)/$', views.AuthViewSet.as_view({'post': 'update'})),
+    url(r'^role/change/(?P<pk>.*)/$', views.AuthChangeViewSet.as_view({'post': 'update'}))
 ]

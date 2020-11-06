@@ -1,10 +1,9 @@
-import re
+# _*_ coding: utf-8 _*_
 import datetime
 from rest_framework import serializers
 from rest_framework_jwt.settings import api_settings
 
 from personnel import models
-from rbac.serializers import RoleModelSerializer
 
 jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
@@ -20,7 +19,7 @@ class LoginModelSerializer(serializers.ModelSerializer):
         model = models.User
         fields = [
             # 数据库字段
-            'username', 'usr', 'pwd', 'mobile', #'last_login'
+            'username', 'usr', 'pwd', 'mobile',
         ]
         extra_kwargs = {
             'username':{
@@ -32,7 +31,7 @@ class LoginModelSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
-        print('内部打印', attrs)
+        # print('内部打印', attrs)
         usr = attrs.pop('usr')
         pwd = attrs.pop('pwd')
         user_query = models.User.objects.filter(username=usr)
@@ -46,7 +45,7 @@ class LoginModelSerializer(serializers.ModelSerializer):
             # 写入最后登陆时间
             attrs['last_login'] = datetime.datetime.today()
             return attrs
-        raise serializers.ValidationError({'msg': '数据有误'})
+        raise serializers.ValidationError({'msg': '账号或密码错误'})
 
 
 class AuthModelSerializer(serializers.ModelSerializer):
@@ -66,7 +65,7 @@ class AuthModelSerializer(serializers.ModelSerializer):
         }
 
     def validate(self, attrs):
-        print('内部打印', attrs)
+        # print('内部打印', attrs)
         usr = attrs.pop('usr')
         user_query = models.User.objects.filter(username=usr)
         user_obj = user_query.first()
@@ -80,19 +79,18 @@ class AuthModelSerializer(serializers.ModelSerializer):
             attrs['last_login'] = datetime.datetime.today()
             # 默认给普通用户权限
             return attrs
-        raise serializers.ValidationError({'errmsg': '数据有误或帐号不存在'})
+        raise serializers.ValidationError({'msg': '账号可能未启用'})
 
 
 class AuthCreateUserModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.User
-        fields = ['username', 'mobile', 'name', 'is_active', 'roles',
-                  'avatar', 'gender']
+        fields = ['username', 'mobile', 'name', 'is_active', 'position',
+                  'avatar', 'gender', 'auth']
 
     def validate(self, attrs):
         attrs['is_active'] = True
-        attrs['roles'] = [2]
         return attrs
 
 
@@ -111,7 +109,7 @@ class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = ['id', 'username', 'mobile', 'name', 'last_login', 'gender', 'avatar',
-                  'is_active', 'password', 'email']
+                  'is_active', 'password', 'email', 'position', 'auth', 'menus']
 
 
 class CreateUserModelSerializer(serializers.ModelSerializer):
@@ -149,7 +147,7 @@ class UserListModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.User
-        fields = ['id','username', 'name', 'project', 'department']
+        fields = ['id','username', 'name', 'project', 'department', 'position']
 
 
 class DeptListSerializer(serializers.ListSerializer):
@@ -184,6 +182,6 @@ class DeptModelSerializer(serializers.ModelSerializer):
         if models.Structure.objects.filter(deptid=attrs['id']):
             raise serializers.ValidationError({'msg': '部门已存在'})
         attrs['deptid'] = attrs.pop('id')
-        print(attrs)
+        # print(attrs)
         return attrs
 

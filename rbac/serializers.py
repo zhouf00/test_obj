@@ -8,18 +8,36 @@ class MenuModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Menu
-        fields = ['id', 'title', 'url', 'parent', 'icon']
+        fields = ['id', 'title', 'url', 'parent', 'icon', 'name',
+                  'parentInfo','childrenList']
 
-
-class RoleModelSerializer(serializers.ModelSerializer):
-
-
-    class Meta:
-        model = models.Role
-        fields = ['id', 'title','memo','leaders_list','status', 'user_list', 'leaders']
 
 class AuthModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Auth
-        fields = ['id', 'user', 'userName', 'role', 'memo', 'menu']
+        fields = ['id', 'title', 'memo', 'user', 'menu',
+                  'menuList', 'userList',]
+        extra_kwargs ={
+            'user': {
+                'read_only': True
+            },
+            'menu': {
+                'read_only': True
+            }
+        }
+
+
+class AuthChangeModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Auth
+        fields = ['id', 'user', 'menu']
+        extra_kwargs = {
+            'user': {
+                'required': False
+            },
+            'menu': {
+                'required': False
+            },
+        }

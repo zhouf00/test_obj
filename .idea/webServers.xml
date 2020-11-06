@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="WebServers">
+    <option name="servers">
+      <webServer id="672192d6-de3c-4bb8-a4e6-b7fc19d344f6" name="windit" url="http://10.100.0.151">
+        <fileTransfer host="10.100.0.151" port="22" rootFolder="/data/wwwroot/test_obj" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
+    </option>
+  </component>
+</project>

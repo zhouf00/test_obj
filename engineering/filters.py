@@ -15,11 +15,14 @@ from django_filters.rest_framework.filterset import FilterSet
 from django_filters import filters
 class ProjectFilterSet(FilterSet):
 
-    area = filters.CharFilter(field_name='area__title')
+    name = filters.CharFilter(field_name='name',lookup_expr='icontains')
+    sn = filters.CharFilter(field_name='sn', lookup_expr='icontains')
+    area = filters.CharFilter(field_name='area__id')
+    status = filters.CharFilter(field_name='status__id')
 
     class Meta:
         model = models.Project
-        fields = ['id', 'name', 'area', 'sn']
+        fields = ['id', 'name', 'area', 'sn', 'status']
 
 
 class IdcRoomFilterSet(FilterSet):
