@@ -5,8 +5,7 @@ from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
 from personnel import models, serializers
-from rbac import models as rbac_models
-from utils.my_modelview import MyModelViewSet
+
 from utils.response import APIResponse
 from utils.my_request import MyRequest
 

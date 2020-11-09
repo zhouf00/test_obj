@@ -9,11 +9,12 @@ from engineering import models, serializers, filters
 from utils.response import APIResponse
 from utils.authentications import JWTAuthentication
 from utils.pagenations import MyPageNumberPagination
+from utils.my_modelview import ProjectUpdateViewSet
 
 
 class ProjectViewSet(ModelViewSet):
     """项目列表数据"""
-    queryset = models.Project.objects.filter(is_delete=False).order_by('id')
+    queryset = models.Project.objects.filter(is_delete=False).order_by('-update_time')
     serializer_class = serializers.ProjectModelSerializer
     # permission_classes = [IsAuthenticated]
     # authentication_classes = [JWTAuthentication]
@@ -29,7 +30,7 @@ class ProjectCreateViewSet(ModelViewSet):
     serializer_class = serializers.CreateProjectModelSerializer
 
 
-class IdcRoomViewSet(ModelViewSet):
+class IdcRoomViewSet(ProjectUpdateViewSet):
 
     queryset = models.IdcRoom.objects.all().order_by('id')
     serializer_class = serializers.IdcRoomModelSerializer
@@ -45,7 +46,7 @@ class ProjectManufacturerViewSet(ModelViewSet):
     serializer_class = serializers.ManufacturerModelSerializer
 
 
-class StockViewSet(ModelViewSet):
+class StockViewSet(ProjectUpdateViewSet):
 
     queryset = models.Stock.objects.all().order_by('id')
     serializer_class = serializers.StockModelSerializer
@@ -55,7 +56,7 @@ class StockViewSet(ModelViewSet):
     filter_class = filters.StockFilterSet
 
 
-class InvoiceViewSet(ModelViewSet):
+class InvoiceViewSet(ProjectUpdateViewSet):
 
     queryset = models.Invoice.objects.all().order_by('-create_time')
     serializer_class = serializers.InvoiceModelSerializer
@@ -65,7 +66,7 @@ class InvoiceViewSet(ModelViewSet):
     filter_class = filters.InvoiceFilterSet
 
 
-class InvoiceImageViewSet(ModelViewSet):
+class InvoiceImageViewSet(ProjectUpdateViewSet):
 
     queryset = models.InvoiceImage.objects.all()
     serializer_class = serializers.InvoiceImageModelSerializer
@@ -74,7 +75,7 @@ class InvoiceImageViewSet(ModelViewSet):
     search_fields = ['invoice__id']
 
 
-class ProjectTraceViewSet(ModelViewSet):
+class ProjectTraceViewSet(ProjectUpdateViewSet):
 
     queryset = models.ProjectTrace.objects.all()
     serializer_class = serializers.ProjectTraceModelSerializer

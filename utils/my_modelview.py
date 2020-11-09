@@ -1,31 +1,39 @@
 from rest_framework.response import Response
+from rest_framework.viewsets import ModelViewSet
 
-class MyModelViewSet:
+from engineering.serializers import ProjectUpdateTime
+from engineering.models import Project
 
-    def get_myinstance(self, request, *args, **kwargs):
-        request_data = request.data
-        if isinstance(request_data, list):
-            pks = []
-            for dic in request_data:
-                pk = dic.pop('pk', None)
-                if pk:
-                    pks.append(pk)
-                else:
-                    return '数据有误'
-        else:
-            return '数据有误'
-        objs = []
-        objs2 = []
-        new_request_data = []
-        for index, pk in enumerate(pks):
-            try:
-                obj = self.queryset.get(deptid=pk)
-                objs.append(obj)
-                new_request_data.append(request_data[index])
-            except:
-                print('报错')
-                continue
-        # print(objs)
-        # print(objs2)
-        print(new_request_data)
-        return objs, new_request_data
+from utils.response import APIResponse
+
+def UpdateTime(id):
+
+    project_obj = Project.objects.filter(pk=id)
+    finish_list = ['未完成' for var in project_obj.values('stock__finish') if var['stock__finish']!= 2]
+    if not '未完成' in finish_list:
+        stock_finish = '完成'
+    project_ser = ProjectUpdateTime(instance=project_obj.first(), data={'priority': 1,'stock_finish': stock_finish})
+    project_ser.is_valid(raise_exception=True)
+    project_ser.save()
+
+
+# 使用后更新项目的最新日期
+class ProjectUpdateViewSet(ModelViewSet):
+
+    def create(self, request, *args, **kwargs):
+        if 'project' in request.data and request.data['project']:
+            UpdateTime(request.data['project'])
+        super().create(request, *args, **kwargs)
+        return APIResponse(
+            data_msg='create ok',
+            results=request.data
+        )
+
+    def update(self, request, *args, **kwargs):
+        if 'project' in request.data and request.data['project']:
+            UpdateTime(request.data['project'])
+        super().update(request, *args, **kwargs)
+        return APIResponse(
+            data_msg='update ok',
+            results=request.data
+        )

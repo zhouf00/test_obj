@@ -10,7 +10,7 @@ class MyPageNumberPagination(PageNumberPagination):
     page_query_param = 'page'
     page_size = 3
     page_size_query_param = 'pageSize'
-    max_page_size = 10
+    max_page_size = 20
 
 
 # 偏移分页器

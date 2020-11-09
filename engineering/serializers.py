@@ -119,6 +119,14 @@ class ProjectTraceModelSerializer(serializers.ModelSerializer):
         fields = ['create_time', 'content', 'user', 'project', 'userInfo']
 
 
+class ProjectUpdateTime(serializers.ModelSerializer):
+    # 待添加发货完成状态
+
+    class Meta:
+        model = models.Project
+        fields = ['id', 'priority']
+
+
 ######
 # 标签组
 #####

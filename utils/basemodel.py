@@ -11,7 +11,9 @@ class BaseModel(models.Model):
     class Meta:
         abstract = True
 
-
+# 2、图片保存路径
 def upload_path_image(instance, filename):
     # print('/'.join([datetime.today().strftime("%Y%m%d"), 'img', filename]))
     return '/'.join([datetime.today().strftime("%Y%m%d"), 'img', filename])
+
+# 3、

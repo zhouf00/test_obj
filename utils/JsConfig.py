@@ -1,3 +1,4 @@
+# 手机扫一扫功能调用接口
 import hashlib
 import time, requests
 from django.conf import settings

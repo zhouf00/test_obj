@@ -23,6 +23,8 @@ class Project(BaseModel):
     finish_time = models.DateTimeField(blank=True, null=True, verbose_name='完成时间')
     memo = models.TextField(blank=True, null=True, verbose_name='备注说明')
 
+    # stock_finish = models.CharField(max_length=16, default='未完成', blank=True, null=True,  verbose_name='发货状态')
+
     # 坐标待使用
     # x = models.DecimalField(max_digits=10, decimal_places=5)
 
@@ -221,6 +223,7 @@ class InvoiceImage(models.Model):
         verbose_name_plural = verbose_name
 
 
+# 项目跟进
 class ProjectTrace(BaseModel):
 
     content = models.TextField(verbose_name='内容')
