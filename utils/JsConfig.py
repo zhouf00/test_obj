@@ -12,7 +12,7 @@ class JsApiConfig(MyRequest):
         return settings.WX_JSAPITICKET
 
     def get_config(self, params):
-        print(params['url'])
+        # print(params['url'])
         noncestr = 'Wm3WZYTPz0wzccnWaa'
         timestamp = int(time.time())
         if not self.JsapiTicket:

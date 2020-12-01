@@ -10,6 +10,7 @@ from utils.response import APIResponse
 from utils.my_request import MyRequest
 
 from utils.authentications import JWTAuthentication
+from utils.pagenations import MyPageNumberPagination
 
 
 class LoginAPIView(APIView):
@@ -101,11 +102,13 @@ class UserViewSet(ModelViewSet):
         )
 
 
+# 拉取所有用户信息
 class UserInfoViewSet(ModelViewSet):
 
-    queryset = models.User.objects.exclude(id=1)
+    queryset = models.User.objects.exclude(id=1).order_by('-last_login')
     serializer_class = serializers.UserModelSerializer
 
+    pagination_class = MyPageNumberPagination
     filter_backends = [SearchFilter, DjangoFilterBackend]
     search_fields =['username', 'name']
 
@@ -116,23 +119,23 @@ class CreateUserViewSet(ModelViewSet):
     serializer_class = serializers.CreateUserModelSerializer
 
 
-class UpdateStatusViewSet(GenericViewSet, mixins.UpdateModelMixin):
+class UpdateUserStatusViewSet(GenericViewSet, mixins.UpdateModelMixin):
 
     queryset = models.User.objects.exclude(id=1)
     serializer_class = serializers.UpdateStatusModelSerializer
 
     def my_update(self, request, *args, **kwargs):
-        # print(request.data)
-        # status = request.data.get('status')
-        # if status:
-        #     request.data['is_active'] = True
-        # else:
-        #     request.data['is_active'] = False
         super().update(request, *args, **kwargs)
         return APIResponse(
             data_msg='post ok',
             results=request.data
         )
+
+
+class UpdateUserDeptViewSet(ModelViewSet):
+
+    queryset = models.User.objects.exclude(id=1)
+    serializer_class = serializers.UpdateDeptModelSerializer
 
 
 class UserListViewSet(ModelViewSet):
@@ -141,13 +144,17 @@ class UserListViewSet(ModelViewSet):
     serializer_class = serializers.UserListModelSerializer
 
 
-class DeptListViewSet(GenericViewSet, mixins.ListModelMixin):
-
-    queryset = models.Structure.objects.all()
-    serializer_class = serializers.DeptListModelSerializer
-
-
 class DeptViewSet(ModelViewSet):
 
-    queryset = models.Structure.objects.all()
+    queryset = models.Structure.objects.all().order_by('parentid')
     serializer_class = serializers.DeptModelSerializer
+
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    search_fields =['parentid']
+
+
+class DeptListViewSet(ModelViewSet):
+
+    queryset = models.Structure.objects.filter(parentid=1)
+    serializer_class = serializers.DeptListModelSerializer
+

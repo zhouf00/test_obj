@@ -5,14 +5,16 @@ django.setup()
 
 from engineering.models import Project, Manufacturer
 from personnel import models
-from rbac.models import Menu, Role, Auth
+from rbac.models import Menu, Auth
 from product import models as product_models
+from APPS.crm import models as crm_models
 
 # user = models.User.objects.filter(pk=2)[0]
 # print([var['title'] for var in user.roles.values()])
 # print(Menu.objects.filter(user.roles.all()))
 
-print(len(Project.objects.filter(sn='0092'))==1)
+# print(len(Project.objects.filter(sn='0092'))==1)
+# print(Project.objects.filter(manufacturers__id=3))
 
 # print(Project.objects.filter(builders=2))
 # print(models.User.objects.all())
@@ -22,3 +24,17 @@ print(len(Project.objects.filter(sn='0092'))==1)
 # print(models.Structure.objects.values('user'))
 # if len(product_models.Production.objects.filter(sn=1234)) == 0:
 #     print('没有')
+
+# 部门查询人
+# print(models.Structure.objects.filter(depttouser=1))
+
+##############
+# 销售管理查询
+##############
+import datetime
+print(crm_models.Market.objects.filter(pk=8).first().hit_rate)
+# print(crm_models.RateRecord.objects.filter(hit_rate=0.5).values())
+# 时间计算
+# start = crm_models.RateRecord.objects.filter(market=2).values()[0]['start_time']
+# end = datetime.datetime.strptime('2020-12-1 15:30:20','%Y-%m-%d %H:%M:%S')
+# print((end-start).days)

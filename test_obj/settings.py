@@ -15,6 +15,7 @@ import sys
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(BASE_DIR, 'APPS'))  # 把app集中到APPS中
 sys.path.insert(0, os.path.join(BASE_DIR, 'extra_apps'))
 
 # Quick-start development settings - unsuitable for production
@@ -46,10 +47,11 @@ INSTALLED_APPS = [
     'xadmin',
     # 自定义
     'backend.apps.BackendConfig',
-    'personnel.apps.PersonnelConfig',       # 人员管理
-    'engineering.apps.EngineeringConfig',   # 工程中心
-    'rbac.apps.RbacConfig',                 # 前台菜单权限
-    'product.apps.ProductConfig'            # 产品管理
+    'personnel.apps.PersonnelConfig',        # 人员管理
+    'engineering.apps.EngineeringConfig',    # 工程中心
+    'rbac.apps.RbacConfig',                  # 前台菜单权限
+    'product.apps.ProductConfig',            # 产品管理
+    'APPS.crm.apps.CrmConfig',               # 销售管理
 ]
 
 MIDDLEWARE = [

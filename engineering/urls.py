@@ -9,8 +9,14 @@ urlpatterns = [
     url(r'^project/create/$', views.ProjectCreateViewSet.as_view({'post': 'create'})),
     url(r'^project/updateInfo/(?P<pk>.*)/$', views.ProjectCreateViewSet.as_view({'get': 'retrieve', 'post': 'update'})),
 
+    # 项目更进
     url(r'^trace/$', views.ProjectTraceViewSet.as_view({'get': 'list', 'post':'create'})),
 
+    # 外包商信息
+    url(r'^contract/$', views.ContractViewSet.as_view({'get': 'list', 'post':'create'})),
+    url(r'^contract/(?P<pk>.*)/$', views.ContractViewSet.as_view({'post': 'update'})),
+    url(r'^outsourcer/$', views.OutsourcerViewSet.as_view({'get': 'list', 'post':'create'})),
+    url(r'^outsourcer/(?P<pk>.*)/$', views.OutsourcerViewSet.as_view({'post': 'update'})),
 
     # 机房信息
     url(r'^idcroom/$', views.IdcRoomViewSet.as_view({'get': 'list'})),

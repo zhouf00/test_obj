@@ -23,10 +23,16 @@ class Project(BaseModel):
     finish_time = models.DateTimeField(blank=True, null=True, verbose_name='完成时间')
     memo = models.TextField(blank=True, null=True, verbose_name='备注说明')
 
-    # stock_finish = models.CharField(max_length=16, default='未完成', blank=True, null=True,  verbose_name='发货状态')
+    stock_finish = models.CharField(max_length=16, default='未完成', blank=True, null=True,  verbose_name='发货状态')
 
     # 坐标待使用
     # x = models.DecimalField(max_digits=10, decimal_places=5)
+
+    manufacturers = models.ManyToManyField(
+        to='Manufacturer',
+        db_constraint=False,
+        related_name='project'
+    )
 
     type = models.ForeignKey(
         to='ProjectType',
@@ -55,11 +61,6 @@ class Project(BaseModel):
         related_name='project',
         verbose_name='项目作业环境',
         blank=True, null=True
-    )
-    manufacturers = models.ManyToManyField(
-        to='Manufacturer',
-        db_constraint=False,
-        related_name='project'
     )
 
     @property
@@ -102,7 +103,6 @@ class Project(BaseModel):
         verbose_name_plural = verbose_name
 
 
-
 # 机房设备
 class IdcRoom(BaseModel):
 
@@ -121,6 +121,7 @@ class IdcRoom(BaseModel):
 
 # 设备型号
 class Machine(BaseModel):
+
     title = models.CharField(max_length=64, verbose_name='机器型号')
     param = models.TextField(blank=True, null=True, verbose_name='设备参数')
     memo = models.TextField(blank=True, null=True, verbose_name='备注')
@@ -140,6 +141,7 @@ class Machine(BaseModel):
 
 # 厂家
 class Manufacturer(BaseModel):
+
     title = models.CharField(max_length=64, verbose_name='厂商名称')
     telephone = models.CharField(max_length=11, blank=True, null=True, verbose_name='厂商电话')
     memo = models.TextField(null=True, blank=True, verbose_name='备注')
@@ -152,6 +154,54 @@ class Manufacturer(BaseModel):
         verbose_name_plural = verbose_name
 
 
+# 承包信息
+class Contract(BaseModel):
+
+    project = models.ForeignKey('Project', on_delete=models.CASCADE,
+                                related_name='contract', verbose_name='项目')
+    name = models.ForeignKey('Outsourcer', on_delete=models.CASCADE,
+                             related_name='contract', verbose_name='承包商信息')
+    context = models.TextField(blank=True, null=True, verbose_name='承包内容')
+    payment = models.IntegerField(blank=True, null=True, verbose_name='承包货款')
+    payment_rate = models.SmallIntegerField(default=0, blank=True, null=True, verbose_name='货款进度')
+    payment_time = models.DateTimeField(blank=True, null=True, verbose_name='付款时间')
+    delivery_time = models.DateTimeField(blank=True, null=True, verbose_name='加入时间')
+
+    def nameInfo(self):
+        print(self.name.info())
+        return self.name.info()
+
+    class Meta:
+        verbose_name = '承包信息'
+        verbose_name_plural = verbose_name
+
+    # 承包商
+class Outsourcer(BaseModel):
+
+    type = models.CharField(max_length=32, blank=True, null=True, verbose_name='承包商类型')
+    title = models.CharField(max_length=64, verbose_name='承包商名称')
+    scale = models.CharField(max_length=32, blank=True, null=True, verbose_name='承包商规模')
+    linkman = models.CharField(max_length=32, blank=True, null=True, verbose_name='承包商联系人')
+    phone = models.CharField(max_length=11, blank=True, null=True, verbose_name='承包商联系人手机')
+    join_time = models.DateTimeField(blank=True, null=True, verbose_name='加入时间')
+    memo = models.TextField(blank=True, null=True, verbose_name='备注')
+
+    def info(self):
+        return {
+            'id': self.id,
+            'title': self.title,
+            'scale': self.scale,
+            'linkman': self.linkman,
+            'phone': self.phone,
+            'memo': self.memo
+        }
+
+    class Meta:
+        verbose_name = '承包商'
+        verbose_name_plural = verbose_name
+
+
+# 库存信息
 class Stock(BaseModel):
 
     project = models.ForeignKey(
@@ -185,6 +235,7 @@ class Stock(BaseModel):
         verbose_name_plural = verbose_name
 
 
+# 发货信息
 class Invoice(BaseModel):
 
     project = models.ForeignKey(
@@ -206,6 +257,7 @@ class Invoice(BaseModel):
         verbose_name_plural = verbose_name
 
 
+# 发货图片
 class InvoiceImage(models.Model):
 
     title = models.CharField(max_length=64, blank=True, null=True, verbose_name='文件名称')
@@ -246,8 +298,8 @@ class ProjectTrace(BaseModel):
         verbose_name_plural = verbose_name
 
 
-
 class EventLog(BaseModel):
+
     project = models.ForeignKey(to='Project', on_delete=models.CASCADE, related_name='log')
     event_type = models.SmallIntegerField(default=1, verbose_name='事件类型')
     detail = models.TextField(verbose_name='事件详情')
@@ -258,7 +310,6 @@ class EventLog(BaseModel):
     class Meta:
         verbose_name = '日志'
         verbose_name_plural = verbose_name
-
 
 
 ##########

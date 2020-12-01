@@ -37,7 +37,6 @@ class CreateProjectModelSerializer(serializers.ModelSerializer):
                   'status', 'monitor_type', 'type', 'builders', 'manager', 'working_env']
 
     def validate(self, attrs):
-        # print(attrs)
         sn = attrs['sn']
         pj_sn = attrs['pj_sn']
         if self.instance:
@@ -55,14 +54,14 @@ class CreateProjectModelSerializer(serializers.ModelSerializer):
         return attrs
 
 
+# 项目的序列化
 class ProjectModelSerializer(serializers.ModelSerializer):
-
 
     class Meta:
         model = models.Project
         fields = [
             'id', 'is_delete', 'name', 'address', 'sn', 'update_time', 'entrance_time', 'finish_time',
-            'facility_count', 'manager', 'memo', 'pj_sn',
+            'facility_count', 'manager', 'memo', 'pj_sn', 'stock_finish',
             # 自定义信息
             'monitortypeList', 'typeInfo', 'statusInfo', 'areaInfo', 'working_envInfo', 'buildersList',
              'manufacturersList', 'monitorNumberList'
@@ -82,6 +81,24 @@ class ProjectModelSerializer(serializers.ModelSerializer):
                 'required': False
             },
         }
+
+
+# 承包信息序列化
+class ContractModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Contract
+        fields = ['id', 'project', 'name', 'context', 'payment', 'payment_rate', 'delivery_time',
+                  'payment_time',
+                  'nameInfo']
+
+
+# 承包商序列化
+class OutsourcerModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Outsourcer
+        fields = ['id', 'type', 'title', 'scale', 'linkman', 'phone', 'join_time', 'memo']
 
 
 class StockModelSerializer(serializers.ModelSerializer):
@@ -119,12 +136,12 @@ class ProjectTraceModelSerializer(serializers.ModelSerializer):
         fields = ['create_time', 'content', 'user', 'project', 'userInfo']
 
 
+# 项目修改更新时间
 class ProjectUpdateTime(serializers.ModelSerializer):
-    # 待添加发货完成状态
 
     class Meta:
         model = models.Project
-        fields = ['id', 'priority']
+        fields = ['id', 'priority', 'stock_finish']
 
 
 ######

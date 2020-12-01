@@ -10,10 +10,8 @@ class JsApiAPIView(APIView):
 
     def post(self,request, *args, **kwargs):
         params = request.data
-        print(params)
         jsapi = JsApiConfig()
         config = jsapi.get_config(params)
-        print(config)
         return APIResponse(
             data_msg='jsapi ok',
             results=config

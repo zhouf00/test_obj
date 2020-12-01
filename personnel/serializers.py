@@ -9,6 +9,7 @@ jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 
+# 用户密码登陆
 class LoginModelSerializer(serializers.ModelSerializer):
 
     # 自定义序列化属性
@@ -48,6 +49,7 @@ class LoginModelSerializer(serializers.ModelSerializer):
         raise serializers.ValidationError({'msg': '账号或密码错误'})
 
 
+# 企业微信登陆
 class AuthModelSerializer(serializers.ModelSerializer):
 
     usr = serializers.CharField(write_only=True)
@@ -109,7 +111,8 @@ class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = ['id', 'username', 'mobile', 'name', 'last_login', 'gender', 'avatar',
-                  'is_active', 'password', 'email', 'position', 'auth', 'menus']
+                  'is_active', 'password', 'email', 'position', 'auth', 'menus', 'departments',
+                  ]
 
 
 class CreateUserModelSerializer(serializers.ModelSerializer):
@@ -143,6 +146,13 @@ class UpdateStatusModelSerializer(serializers.ModelSerializer):
         }
 
 
+class UpdateDeptModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.User
+        fields = ['id', 'departments']
+
+
 class UserListModelSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -157,31 +167,21 @@ class DeptListSerializer(serializers.ListSerializer):
         return instance
 
 
+class DeptModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Structure
+        fields = ['id', 'deptid', 'name', 'parentid', 'order', 'user',
+                  'childrenList']
+        extra_kwargs = {
+            'id': {
+                'read_only': True
+            }
+        }
+
+
 class DeptListModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Structure
-        fields = ['id', 'deptid', 'name', 'parentid', 'order', 'user']
-
-
-class DeptModelSerializer(serializers.ModelSerializer):
-
-    id = serializers.IntegerField(write_only=True)
-
-    class Meta:
-        model = models.Structure
-        list_serializer_class = DeptListSerializer
-        fields = ['id', 'deptid', 'name', 'parentid', 'order']
-        extra_kwargs = {
-            'deptid':{
-                'required': False
-            }
-        }
-
-    def validate(self, attrs):
-        if models.Structure.objects.filter(deptid=attrs['id']):
-            raise serializers.ValidationError({'msg': '部门已存在'})
-        attrs['deptid'] = attrs.pop('id')
-        # print(attrs)
-        return attrs
-
+        fields = ['id', 'name', 'childrenList']

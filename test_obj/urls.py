@@ -28,6 +28,7 @@ urlpatterns = [
     url(r'^api/engineering/', include('engineering.urls')),
     url(r'^api/product/', include('product.urls')),
     url(r'^api/rbac/', include('rbac.urls')),
+    url(r'^api/crm/', include('APPS.crm.urls')),
 
     url(r'^api/media/(?P<path>.*)', serve, {'document_root': settings.MEDIA_ROOT})
 ]

@@ -9,7 +9,7 @@ from utils.basemodel import BaseModel, upload_path_image
 class User(AbstractUser):
 
     mobile = models.CharField(max_length=11, blank=True, null=True, verbose_name='手机')
-    name = models.CharField(blank=True, max_length=32, verbose_name='中文名')
+    name = models.CharField(blank=True, null=True, max_length=32, verbose_name='中文名')
     gender = models.SmallIntegerField(default=1, verbose_name='性别')
     avatar = models.URLField(default='https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2866953378,474015488&fm=11&gp=0.jpg',
                              verbose_name='头像链接')
@@ -21,6 +21,18 @@ class User(AbstractUser):
         related_name='user',
         through='DeptToUser',
         through_fields=('user', 'department')
+    )
+
+    departments = models.ManyToManyField(
+        to='Structure',
+        related_name='users',
+        db_constraint=False,
+    )
+
+    dept_leader = models.ManyToManyField(
+        to='Structure',
+        related_name='leader',
+        db_constraint=False,
     )
 
     project = models.ForeignKey(
@@ -68,14 +80,20 @@ class Structure(BaseModel):
     deptid = models.IntegerField(unique=True, verbose_name='部门ID')
     name = models.CharField(max_length=32, unique=True, verbose_name='部门名称')
     type = models.SmallIntegerField(default=0, verbose_name='类型')
-    parentid = models.ForeignKey('self', to_field='deptid', on_delete=models.CASCADE, null=True, blank=True, verbose_name='父类构架')
-    order = models.IntegerField(verbose_name='排序')
+    parentid = models.ForeignKey('self', on_delete=models.CASCADE, null=True, blank=True, verbose_name='父类构架',
+                                  to_field='deptid', related_name='children')
+    order = models.IntegerField(blank=True, null=True, verbose_name='排序')
 
     menu = models.ManyToManyField(
         to='rbac.Menu',
         db_constraint=False,
         related_name='department',
     )
+
+    @property
+    def childrenList(self):
+        return self.children.values('id','name')
+
 
     def __str__(self):
         return self.name

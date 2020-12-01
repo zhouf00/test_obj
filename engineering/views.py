@@ -46,6 +46,21 @@ class ProjectManufacturerViewSet(ModelViewSet):
     serializer_class = serializers.ManufacturerModelSerializer
 
 
+class ContractViewSet(ModelViewSet):
+
+    queryset = models.Contract.objects.all()
+    serializer_class = serializers.ContractModelSerializer
+
+    filter_class = filters.ContractFilterSet
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+
+
+class OutsourcerViewSet(ModelViewSet):
+
+    queryset = models.Outsourcer.objects.all()
+    serializer_class = serializers.OutsourcerModelSerializer
+
+
 class StockViewSet(ProjectUpdateViewSet):
 
     queryset = models.Stock.objects.all().order_by('id')
@@ -77,11 +92,11 @@ class InvoiceImageViewSet(ProjectUpdateViewSet):
 
 class ProjectTraceViewSet(ProjectUpdateViewSet):
 
-    queryset = models.ProjectTrace.objects.all()
+    queryset = models.ProjectTrace.objects.all().order_by('-create_time')
     serializer_class = serializers.ProjectTraceModelSerializer
 
+    filter_class = filters.ProjectTraceFilterSet
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    search_fields = ['project__id']
 
 
 

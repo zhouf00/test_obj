@@ -52,7 +52,6 @@ class Auth(models.Model):
         to='personnel.User',
         db_constraint=False,
         related_name='auth',
-        blank=True, null=True
     )
 
     @property
