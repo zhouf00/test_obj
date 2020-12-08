@@ -4,13 +4,15 @@ from . import models
 
 class MarketModelSerializer(serializers.ModelSerializer):
 
+    # leaders = serializers.CharField()
+
     class Meta:
         model = models.Market
         fields = ['id', 'title', 'customer', 'company', 'address', 'designing_institute', 'manufacturer', 'sn',
                   'count', 'estimated_time', 'estimated_amount', 'hit_rate', 'memo', 'create_time','user',
-                  'amount', 'traceTime', 'type',
+                  'amount', 'traceTime','type',
                   # 自定义字段
-                  'raterecordList', 'userList'
+                  'raterecordList', 'userList', 'typeList'
                   ]
 
 

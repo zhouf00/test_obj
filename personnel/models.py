@@ -18,21 +18,10 @@ class User(AbstractUser):
 
     department = models.ManyToManyField(
         to='Structure',
-        related_name='user',
-        through='DeptToUser',
-        through_fields=('user', 'department')
-    )
-
-    departments = models.ManyToManyField(
-        to='Structure',
         related_name='users',
-        db_constraint=False,
-    )
-
-    dept_leader = models.ManyToManyField(
-        to='Structure',
-        related_name='leader',
-        db_constraint=False,
+        through='DeptToUser',
+        through_fields=('user', 'department'),
+        default=[1]
     )
 
     project = models.ForeignKey(
@@ -42,20 +31,43 @@ class User(AbstractUser):
         blank=True, null=True
     )
 
-    @property
+    @property   # 获取有权限的菜单
     def menus(self):
-        list = self.auth.values('menu__name')
+        menu_list = list(self.auth.values('menu__name'))
+        # print(menu_list)
+        menu_list+=list(self.department.values('menu__name'))
         # print(list)
-        menu = [ var['menu__name'] for var in list if var['menu__name'] ]
+        # menu = [ var['menu__name'] for var in menu_list if var['menu__name'] ]
+        menu = []
+        for var in menu_list:
+            if var['menu__name'] not in menu:
+                menu.append(var['menu__name'])
         return menu
 
-    @property
+    @property   # 获取管理员身份
     def roleList(self):
         list = self.auth.values('id', 'title')
-        role = [ var['title'] for var in list ]
+        role = [var['title'] for var in list ]
         return role
 
-    @property
+    @property   # 获取管理的部门
+    def deptList(self):
+        d = self.depttouser_set.values()
+        leaders = [var['department_id']for var in d if var['isleader']]
+        # print('管理的部门ID:',leaders)
+        return leaders
+
+    @property   # 获取管理部门的成员
+    def deptmembers(self):
+        d_list = []
+        d = self.department.filter(deptid__in=self.deptList)
+        for var in d:
+            d_list += list(var.depttouser_set.values('user_id'))
+        users = [var['user_id'] for var in d_list]
+        # print('部门成员的ID:', users)
+        return users
+
+    @property   # 以字典的形式发送用户的指定信息
     def info(self):
         return {
             'id': self.id,
@@ -91,6 +103,31 @@ class Structure(BaseModel):
     )
 
     @property
+    def usersInfoList(self):
+        users = self.depttouser_set.values('user_id', 'user__name', 'isleader')
+        user_list = [{'username': var['user_id'], 'name': var['user__name']} for var in users]
+        return user_list
+
+    @property
+    def userList(self):
+        users = self.depttouser_set.values('user_id')
+        user_list = [var['user_id'] for var in users]
+        return user_list
+
+    @property
+    def leaders(self):
+        users = self.depttouser_set.values('user_id', 'user__name','isleader')
+        # print(users)
+        leader_list = [{'username': var['user_id'], 'name': var['user__name']}for var in users if var['isleader']]
+        return leader_list
+
+    @property
+    def leaderList(self):
+        users = self.depttouser_set.values('user_id', 'isleader')
+        user_list = [var['user_id'] for var in users if var['isleader']]
+        return user_list
+
+    @property
     def childrenList(self):
         return self.children.values('id','name')
 
@@ -108,4 +145,9 @@ class DeptToUser(models.Model):
 
     user = models.ForeignKey(User, on_delete=models.CASCADE, to_field='username')
     department = models.ForeignKey(Structure, on_delete=models.CASCADE, to_field='deptid')
-    leader = models.BooleanField(verbose_name='是否领导')
+    isleader = models.BooleanField(default=False, verbose_name='是否领导')
+
+    class Meta:
+        db_table = 'user_departments'
+        verbose_name = '用户部门中间表'
+        verbose_name_plural = verbose_name

@@ -87,7 +87,7 @@ class auth2APIView(APIView):
 
 class UserViewSet(ModelViewSet):
 
-    authentication_classes = [JWTAuthentication]
+    # authentication_classes = [JWTAuthentication]
 
     def info(self, request, *args, **kwargs):
         # 拿到前台登录信息，交给序列化类，规则：帐号用usr传，密码用pwd传
@@ -132,25 +132,19 @@ class UpdateUserStatusViewSet(GenericViewSet, mixins.UpdateModelMixin):
         )
 
 
-class UpdateUserDeptViewSet(ModelViewSet):
-
-    queryset = models.User.objects.exclude(id=1)
-    serializer_class = serializers.UpdateDeptModelSerializer
-
-
 class UserListViewSet(ModelViewSet):
 
     queryset = models.User.objects.exclude(id=1)
     serializer_class = serializers.UserListModelSerializer
 
 
+##################
+# 部门管理
+##################
 class DeptViewSet(ModelViewSet):
 
     queryset = models.Structure.objects.all().order_by('parentid')
     serializer_class = serializers.DeptModelSerializer
-
-    filter_backends = [SearchFilter, DjangoFilterBackend]
-    search_fields =['parentid']
 
 
 class DeptListViewSet(ModelViewSet):
@@ -158,3 +152,42 @@ class DeptListViewSet(ModelViewSet):
     queryset = models.Structure.objects.filter(parentid=1)
     serializer_class = serializers.DeptListModelSerializer
 
+
+# 部门添加成员
+class DeptToUserViewSet(APIView):
+
+    def post(self, request, *args, **kwargs):
+        # print(request.data)
+        request_data = request.data
+        d = models.DeptToUser.objects.filter(department_id=request_data['department'])
+        # print(d.values())
+        d.exclude(user__in=request_data['userList']).delete()
+        obj_list = []
+        # print(len(d), d.values())
+        if len(request_data['userList']) > len(d):
+            for var in request_data['userList']:
+                if not d.filter(user=var):
+                    obj_list.append(models.DeptToUser(department_id=request_data['department'],user_id=var))
+            # print(obj_list)
+            models.DeptToUser.objects.bulk_create(obj_list)
+        else:
+            # print('结束')
+            pass
+        return APIResponse(results=request.data)
+
+
+# 部门添加上级
+class DeptLeaderViewSet(APIView):
+
+    def post(self, request, *args, **kwargs):
+        # print(request.data)
+        request_data = request.data
+        # 把用户改成非领导
+        models.DeptToUser.objects.filter(
+            department_id=request_data['department'],isleader=True).exclude(
+            user__in=request_data['leaderList']).update(isleader=False)
+        # 把用户改成领导
+        models.DeptToUser.objects.filter(department_id=request_data['department'],
+                                         user__in=request_data['leaderList']).update(isleader=True)
+        # print(models.DeptToUser.objects.filter(department_id=request_data['department'],isleader=True))
+        return APIResponse(results=request.data)

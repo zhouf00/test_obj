@@ -2,9 +2,7 @@ import datetime
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
-
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
+from django.db.models import Q
 
 from . import models, serializers, filters
 from utils.response import APIResponse
@@ -21,6 +19,27 @@ class MarketViewSet(ModelViewSet):
     pagination_class = MyPageNumberPagination
     filter_class = filters.MarketFilter
     filter_backends = [SearchFilter, DjangoFilterBackend]
+
+    isleader = False
+
+    def get_queryset(self):
+        super().get_queryset()
+        # 拿到管理员身份
+        role = self.request.user.roleList
+        if '超级管理员' in role:
+            # print('你是管理员')
+            pass
+        else:
+            # 拿到部门领导身份
+            if self.request.user.deptList:
+                # print('你是部门领导')
+                self.isleader = True
+                self.queryset = self.queryset.filter(user__username__in=self.request.user.deptmembers).distinct()
+            else:
+                # print('你不是部门领导')
+                self.isleader = False
+                self.queryset = self.queryset.filter(user=self.request.user.id).distinct()
+        return self.queryset
 
     def create(self, request, *args, **kwargs):
         #
@@ -46,6 +65,13 @@ class MarketViewSet(ModelViewSet):
             results=serializer.data,
             headers=headers,
         )
+
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        data = serializer.data
+        data['isleader'] = self.isleader
+        return APIResponse(results=data)
 
 
 class MarketTraceViewSet(ModelViewSet):

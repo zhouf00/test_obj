@@ -18,6 +18,14 @@ class MenuViewSet(ModelViewSet):
     filter_backends = [SearchFilter, DjangoFilterBackend]
 
 
+class MenuAuthViewSet(ModelViewSet):
+    queryset = models.Menu.objects.all()
+    serializer_class = serializers.MenuAuthModelSerializer
+
+    filter_class = filters.MenuFilterSet
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+
+
 class AuthViewSet(ModelViewSet):
 
     queryset = models.Auth.objects.all()

@@ -8,8 +8,24 @@ class MenuModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Menu
-        fields = ['id', 'title', 'url', 'parent', 'icon', 'name',
+        fields = ['id', 'title', 'url', 'parent', 'icon', 'name', 'department',
                   'parentInfo','childrenList']
+        extra_kwargs = {
+            'department': {
+                'required': False
+            },
+        }
+
+
+class MenuAuthModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Menu
+        fields = ['id', 'department']
+
+    def validate(self, attrs):
+        print('修改', self.instance, attrs)
+        return attrs
 
 
 class AuthModelSerializer(serializers.ModelSerializer):

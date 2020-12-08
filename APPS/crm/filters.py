@@ -16,7 +16,6 @@ class LimitFilter:
 
 class MarketFilter(FilterSet):
 
-    # date = filters.CharFilter(field_name='record__')
     title = filters.CharFilter(field_name='title', lookup_expr='icontains')
     user = filters.CharFilter(field_name='user__name', lookup_expr='icontains')
     company = filters.CharFilter(field_name='company', lookup_expr='icontains')

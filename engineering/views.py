@@ -16,8 +16,8 @@ class ProjectViewSet(ModelViewSet):
     """项目列表数据"""
     queryset = models.Project.objects.filter(is_delete=False).order_by('-update_time')
     serializer_class = serializers.ProjectModelSerializer
-    # permission_classes = [IsAuthenticated]
-    # authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [JWTAuthentication]
 
     pagination_class = MyPageNumberPagination
     filter_class = filters.ProjectFilterSet

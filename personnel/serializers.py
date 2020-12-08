@@ -111,7 +111,8 @@ class UserModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = ['id', 'username', 'mobile', 'name', 'last_login', 'gender', 'avatar',
-                  'is_active', 'password', 'email', 'position', 'auth', 'menus', 'departments',
+                  'is_active', 'email', 'position', 'auth',
+                  'menus',
                   ]
 
 
@@ -119,19 +120,26 @@ class CreateUserModelSerializer(serializers.ModelSerializer):
 
     def create(self, validated_data):
         user = super().create(validated_data)
-        user.set_password(validated_data['password'])
-        user.save()
+        if 'password' in validated_data:
+            user.set_password(validated_data['password'])
+            user.save()
         return user
 
     def update(self, instance, validated_data):
         user = super().update(instance, validated_data)
-        user.set_password(validated_data['password'])
-        user.save()
+        if 'password' in validated_data:
+            user.set_password(validated_data['password'])
+            user.save()
         return user
 
     class Meta:
         model = models.User
         fields = ['username', 'mobile', 'name', 'password', 'is_active']
+        extra_kwargs ={
+            'password': {
+                'required': False
+            }
+        }
 
 
 class UpdateStatusModelSerializer(serializers.ModelSerializer):
@@ -146,11 +154,21 @@ class UpdateStatusModelSerializer(serializers.ModelSerializer):
         }
 
 
-class UpdateDeptModelSerializer(serializers.ModelSerializer):
+class UpdateDeptModelSerializer(serializers.Serializer):
 
     class Meta:
         model = models.User
-        fields = ['id', 'departments']
+        fields = ['id', 'department']
+
+    def validate(self, attrs):
+        # attrs['users'] = attrs.pop('member')
+        print('修改', self.instance, attrs)
+        return attrs
+
+    def update(self, instance, validated_data):
+        instance.departments.set(validated_data.get('department', instance.departments))
+
+        return instance
 
 
 class UserListModelSerializer(serializers.ModelSerializer):
@@ -160,19 +178,12 @@ class UserListModelSerializer(serializers.ModelSerializer):
         fields = ['id','username', 'name', 'project', 'department', 'position']
 
 
-class DeptListSerializer(serializers.ListSerializer):
-    def update(self, instance, validated_data):
-        for index, obj in enumerate(instance):
-            self.child.update(obj, validated_data[index])
-        return instance
-
-
 class DeptModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Structure
-        fields = ['id', 'deptid', 'name', 'parentid', 'order', 'user',
-                  'childrenList']
+        fields = ['id', 'deptid', 'name', 'parentid', 'order',
+                  'childrenList', 'leaders', 'leaderList', 'usersInfoList', 'userList']
         extra_kwargs = {
             'id': {
                 'read_only': True
@@ -185,3 +196,30 @@ class DeptListModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Structure
         fields = ['id', 'name', 'childrenList']
+
+
+class DeptUserUpdateModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Structure
+        fields = ['id', 'users', 'type', 'test']
+
+    def validate(self, attrs):
+
+        print('修改', self.instance, attrs)
+        return attrs
+
+
+class DeptToUserSerializer(serializers.ListSerializer):
+    def update(self, instance, validated_data):
+        for index, obj in enumerate(instance):
+            self.child.update(obj, validated_data[index])
+        return instance
+
+
+class DeptToUserModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.DeptToUser
+        fields = ['id', 'user', 'department', 'isleader']
+        list_serializer_class = DeptToUserSerializer

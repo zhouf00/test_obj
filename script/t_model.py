@@ -32,9 +32,15 @@ from APPS.crm import models as crm_models
 # 销售管理查询
 ##############
 import datetime
-print(crm_models.Market.objects.filter(pk=8).first().hit_rate)
+# print(crm_models.Market.objects.filter(pk=8).first().hit_rate)
 # print(crm_models.RateRecord.objects.filter(hit_rate=0.5).values())
 # 时间计算
 # start = crm_models.RateRecord.objects.filter(market=2).values()[0]['start_time']
 # end = datetime.datetime.strptime('2020-12-1 15:30:20','%Y-%m-%d %H:%M:%S')
 # print((end-start).days)
+print(crm_models.Market.objects.filter(user__in=[15, 16, 17, 19]))
+print(crm_models.Market.objects.filter(user__username__in=['ZhouWenXing', 'gen', 'ZhangJingJing', 'test1']))
+# print(models.User.objects.filter())
+# print(models.Structure.objects.filter(deptid__in=[3]).values('id'))
+# print(models.DeptToUser.objects.filter(department=3))
+# models.DeptToUser.objects.filter(department=3, user__in=['test1','ZhouWenXing']).update(isleader=True)

@@ -1,5 +1,6 @@
 from django.db import models
 
+from personnel import models as p_models
 from utils.basemodel import BaseModel
 # Create your models here.
 
@@ -35,12 +36,16 @@ class Market(BaseModel):
     )
 
     @property
+    def typeList(self):
+        return self.type.values('id', 'title')
+
+    @property
     def raterecordList(self):
         return self.record.values('hit_rate', 'start_time', 'end_time', 'days').order_by('hit_rate')
 
     @property
     def userList(self):
-        return self.user.values('id', 'name')
+        return self.user.values('id', 'name', 'username')
 
     class Meta:
         verbose_name = '商机信息表'

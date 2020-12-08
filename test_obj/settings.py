@@ -101,8 +101,8 @@ DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
 #         'NAME': 'windit',
-#         'HOST': '10.100.0.151',
-#         'PORT': 33060,
+#         'HOST': 'db',
+#         'PORT': 3306,
 #         'USER': 'root',
 #         'PASSWORD':'test'
 #     }
@@ -162,12 +162,13 @@ REST_FRAMEWORK = {
     # 认证类配置
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework.authentication.SessionAuthentication',
-        'rest_framework.authentication.BasicAuthentication'
-
+        'rest_framework.authentication.BasicAuthentication',
+        'utils.authentications.JWTAuthentication'
     ],
     # 权限类配置
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.AllowAny',
+        'rest_framework.permissions.IsAuthenticated',
     ],
 }
 

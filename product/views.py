@@ -16,6 +16,13 @@ class ProductViewSet(ModelViewSet):
     pagination_class = MyPageNumberPagination
     filter_backends = [SearchFilter, DjangoFilterBackend]
 
+
+class ProductListViewSet(ModelViewSet):
+
+    queryset = models.Product.objects.all().order_by('id')
+    serializer_class = serializers.ProductModelSerializer
+
+
 class ProductionViewSet(ModelViewSet):
 
     queryset = models.Production.objects.all().order_by('id')

@@ -7,6 +7,7 @@ urlpatterns = [
     url(r'^$', views.ProductViewSet.as_view({'get': 'list'})),
     url(r'^create/$', views.ProductViewSet.as_view({'post':'create'})),
     url(r'^update/(?P<pk>.*)/$', views.ProductViewSet.as_view({'post': 'update'})),
+    url(r'^list/$', views.ProductListViewSet.as_view({'get': 'list'})),
 
     #　生产出的产品
     url(r'^production/$', views.ProductionViewSet.as_view({'get': 'list'})),
