@@ -15,7 +15,7 @@ class Project(BaseModel):
     contractor = models.CharField(max_length=64, blank=True, null=True, verbose_name='承包商')
     manager = models.CharField(max_length=64, blank=True, null=True, verbose_name='项目负责人')
     province = models.CharField(max_length=64, blank=True, null=True, verbose_name='省份')
-    user_car = models.CharField(max_length=64, blank=True, null=True, verbose_name='项目负责人')
+    user_car = models.CharField(max_length=64, blank=True, null=True, verbose_name='用车')
 
     image = models.ImageField(upload_to=upload_path_image, default='img/default.jpg', blank=True, null=True,
                               verbose_name='默认图片')

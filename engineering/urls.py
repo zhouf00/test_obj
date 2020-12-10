@@ -16,6 +16,7 @@ urlpatterns = [
     url(r'^contract/$', views.ContractViewSet.as_view({'get': 'list', 'post':'create'})),
     url(r'^contract/(?P<pk>.*)/$', views.ContractViewSet.as_view({'post': 'update'})),
     url(r'^outsourcer/$', views.OutsourcerViewSet.as_view({'get': 'list', 'post':'create'})),
+    url(r'^outsourcer/list/$', views.OutsourcerListViewSet.as_view({'get': 'list'})),
     url(r'^outsourcer/(?P<pk>.*)/$', views.OutsourcerViewSet.as_view({'post': 'update'})),
 
     # 机房信息

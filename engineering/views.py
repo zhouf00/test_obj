@@ -2,12 +2,9 @@ from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
 
-from rest_framework.permissions import IsAuthenticated
-from rest_framework_jwt.authentication import JSONWebTokenAuthentication
-
 from engineering import models, serializers, filters
+
 from utils.response import APIResponse
-from utils.authentications import JWTAuthentication
 from utils.pagenations import MyPageNumberPagination
 from utils.my_modelview import ProjectUpdateViewSet
 
@@ -16,12 +13,32 @@ class ProjectViewSet(ModelViewSet):
     """项目列表数据"""
     queryset = models.Project.objects.filter(is_delete=False).order_by('-update_time')
     serializer_class = serializers.ProjectModelSerializer
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [JWTAuthentication]
 
     pagination_class = MyPageNumberPagination
     filter_class = filters.ProjectFilterSet
     filter_backends = [SearchFilter, DjangoFilterBackend]
+
+    def get_queryset(self):
+        super().get_queryset()
+        # 拿到管理员身份
+        role = self.request.user.roleList
+        if '超级管理员' in role:
+            # print('你是管理员')
+            pass
+        elif '普通用户'in role and len(role)>1:
+            pass
+        else:
+            pass
+            # 拿到部门领导身份
+            if self.request.user.deptList:
+                # print('你是部门领导')
+                # self.isleader = True
+                self.queryset = self.queryset.filter(manager__in=self.request.user.deptmembers[1]).distinct()
+            else:
+                print('你不是部门领导')
+                # self.isleader = False
+                self.queryset = self.queryset.filter(manager=self.request.user.name).distinct()
+        return self.queryset
 
 
 class ProjectCreateViewSet(ModelViewSet):
@@ -56,6 +73,16 @@ class ContractViewSet(ModelViewSet):
 
 
 class OutsourcerViewSet(ModelViewSet):
+
+    queryset = models.Outsourcer.objects.all().order_by('id')
+    serializer_class = serializers.OutsourcerModelSerializer
+
+    pagination_class = MyPageNumberPagination
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    filter_class = filters.OutsourcerFilterSet
+
+
+class OutsourcerListViewSet(ModelViewSet):
 
     queryset = models.Outsourcer.objects.all()
     serializer_class = serializers.OutsourcerModelSerializer

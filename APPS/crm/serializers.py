@@ -12,7 +12,7 @@ class MarketModelSerializer(serializers.ModelSerializer):
                   'count', 'estimated_time', 'estimated_amount', 'hit_rate', 'memo', 'create_time','user',
                   'amount', 'traceTime','type',
                   # 自定义字段
-                  'raterecordList', 'userList', 'typeList'
+                  'raterecordList', 'userList', 'typeList', 'totalDays'
                   ]
 
 

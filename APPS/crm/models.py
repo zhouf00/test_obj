@@ -17,11 +17,14 @@ class Market(BaseModel):
     sn = models.CharField(max_length=32, blank=True, null=True, verbose_name='编号')
     count = models.IntegerField(blank=True, null=True, verbose_name='设置数量')
     estimated_time = models.DateTimeField(blank=True, null=True, verbose_name='预计时间')
-    estimated_amount = models.IntegerField(default=0, blank=True, null=True, verbose_name='预额')
+    estimated_amount = models.FloatField(default=0, blank=True, null=True, verbose_name='预额')
     hit_rate = models.FloatField(default=0, blank=True, null=True, verbose_name='命中率')
     memo = models.TextField(blank=True, null=True, verbose_name='备注')
     traceTime = models.DateTimeField(blank=True, null=True, verbose_name='跟进时间')
-    amount = models.IntegerField(default=0, blank=True, null=True, verbose_name='漏额')
+    amount = models.FloatField(default=0, blank=True, null=True, verbose_name='漏额')
+
+    #
+    days = 0
 
     type = models.ManyToManyField(
         to='product.Product',
@@ -40,8 +43,16 @@ class Market(BaseModel):
         return self.type.values('id', 'title')
 
     @property
+    def totalDays(self):
+        return self.days
+
+    @property
     def raterecordList(self):
-        return self.record.values('hit_rate', 'start_time', 'end_time', 'days').order_by('hit_rate')
+        d = self.record.values('hit_rate', 'start_time', 'end_time', 'days').order_by('hit_rate')
+        self.days=0
+        for var in d:
+           self.days += var['days']
+        return d
 
     @property
     def userList(self):

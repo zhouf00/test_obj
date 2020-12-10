@@ -14,11 +14,11 @@ class Menu(BaseModel):
     url = models.CharField(max_length=128, null=True, blank=True, verbose_name='路径')
     name = models.CharField(max_length=64, null=True, blank=True, verbose_name='前端名称')
 
-    role = models.ForeignKey(
+    role = models.ManyToManyField(
         to='Auth',
-        on_delete=models.CASCADE,
+        db_constraint=False,
         related_name='menu',
-        blank=True, null=True
+        blank=True,
     )
 
     @property

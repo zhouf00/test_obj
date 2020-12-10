@@ -30,6 +30,14 @@ class ProjectFilterSet(FilterSet):
         fields = ['id', 'name', 'area', 'sn', 'status', 'manufacturers', 'stock_finish']
 
 
+class OutsourcerFilterSet(FilterSet):
+
+    title = filters.CharFilter(field_name='title',lookup_expr='icontains')
+
+    class Meta:
+        model = models.Outsourcer
+        fields = ['title']
+
 class IdcRoomFilterSet(FilterSet):
 
     project = filters.CharFilter(field_name='project__id')

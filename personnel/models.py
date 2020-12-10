@@ -40,8 +40,9 @@ class User(AbstractUser):
         # menu = [ var['menu__name'] for var in menu_list if var['menu__name'] ]
         menu = []
         for var in menu_list:
-            if var['menu__name'] not in menu:
+            if var['menu__name'] not in menu and var['menu__name']:
                 menu.append(var['menu__name'])
+        # print(menu)
         return menu
 
     @property   # 获取管理员身份
@@ -53,19 +54,36 @@ class User(AbstractUser):
     @property   # 获取管理的部门
     def deptList(self):
         d = self.depttouser_set.values()
-        leaders = [var['department_id']for var in d if var['isleader']]
-        # print('管理的部门ID:',leaders)
-        return leaders
+        dept_list = [var['department_id']for var in d if var['isleader']]
+        child_list = []
+        # 只可以获取2层子部门
+        if dept_list:
+            child_d = self.department.filter(deptid__in=dept_list).exclude(children__deptid=None).values('children__deptid', 'children__children__deptid')
+            # print(child_d)
+            for var in child_d:
+                if var['children__deptid'] and not var['children__children__deptid']:
+                    if not child_list.count(var['children__deptid']):
+                        child_list.append(var['children__deptid'])
+                else:
+                    # if not child_list.count(var['children__deptid']):
+                    #     child_list.append(var['children__deptid'])
+                    if not child_list.count(var['children__children__deptid']):
+                        child_list.append(var['children__children__deptid'])
+        # print('管理的部门ID:',dept_list,child_list)
+        return dept_list+child_list
 
     @property   # 获取管理部门的成员
     def deptmembers(self):
         d_list = []
-        d = self.department.filter(deptid__in=self.deptList)
+        # d = self.department.filter(deptid__in=self.deptList)
+        d = Structure.objects.filter(deptid__in=self.deptList)
         for var in d:
-            d_list += list(var.depttouser_set.values('user_id'))
+            d_list += list(var.depttouser_set.values('user_id', 'user__name'))
         users = [var['user_id'] for var in d_list]
-        # print('部门成员的ID:', users)
-        return users
+        users_name = [var['user__name'] for var in d_list]
+        # print('部门成员的ID:', users, users_name)
+        # 0 返回username ; 0 返回name
+        return users,users_name
 
     @property   # 以字典的形式发送用户的指定信息
     def info(self):

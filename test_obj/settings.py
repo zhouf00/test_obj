@@ -101,8 +101,8 @@ DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
 #         'NAME': 'windit',
-#         'HOST': 'db',
-#         'PORT': 3306,
+#         'HOST': '10.100.0.151',
+#         'PORT': 33060,
 #         'USER': 'root',
 #         'PASSWORD':'test'
 #     }

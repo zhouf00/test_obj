@@ -27,6 +27,7 @@ class MarketViewSet(ModelViewSet):
         # 拿到管理员身份
         role = self.request.user.roleList
         if '超级管理员' in role:
+            self.isleader = True
             # print('你是管理员')
             pass
         else:
@@ -34,7 +35,7 @@ class MarketViewSet(ModelViewSet):
             if self.request.user.deptList:
                 # print('你是部门领导')
                 self.isleader = True
-                self.queryset = self.queryset.filter(user__username__in=self.request.user.deptmembers).distinct()
+                self.queryset = self.queryset.filter(user__username__in=self.request.user.deptmembers[0]).distinct()
             else:
                 # print('你不是部门领导')
                 self.isleader = False
