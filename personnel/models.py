@@ -1,4 +1,5 @@
 # _*_ coding: utf-8 _*_
+from datetime import datetime
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 
@@ -84,6 +85,15 @@ class User(AbstractUser):
         # print('部门成员的ID:', users, users_name)
         # 0 返回username ; 0 返回name
         return users,users_name
+
+    @property
+    def markethistoryInfo(self):
+        d = self.markethistory.filter(date__year=datetime.now().strftime('%Y')).values().order_by('date')
+        d_dict = {var['date'].strftime('%m')+'月': var for var in d}
+        if d_dict:
+            return d_dict
+        else:
+            return {}
 
     @property   # 以字典的形式发送用户的指定信息
     def info(self):

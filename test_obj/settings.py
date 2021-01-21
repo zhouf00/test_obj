@@ -145,7 +145,7 @@ USE_L10N = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.2/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/api/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
 MEDIA_URL = '/api/media/'
@@ -153,7 +153,10 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # 企业微信使用
 WX_TOKEN = ''
-WX_JSAPITICKET = ''
+WX_JSAPITICKET = {
+    'token': '',
+    'ticket': ''
+}
 
 # 配置自定义user表
 AUTH_USER_MODEL = 'personnel.User'

@@ -114,12 +114,21 @@ class InvoiceModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Invoice
         fields = ['id', 'title', 'type', 'count', 'memo', 'project', 'user', 'create_time','img',
+                  'invoice_time',
                   'userInfo']
         extra_kwargs = {
             'img': {
                 'required': False
             },
         }
+
+
+# 临时修改时间
+class InvoiceUpdateModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Invoice
+        fields = ['id', 'invoice_time']
 
 
 class InvoiceImageModelSerializer(serializers.ModelSerializer):

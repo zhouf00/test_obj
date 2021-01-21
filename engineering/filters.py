@@ -20,10 +20,20 @@ class ProjectFilterSet(FilterSet):
 
     name = filters.CharFilter(field_name='name',lookup_expr='icontains')
     sn = filters.CharFilter(field_name='sn', lookup_expr='icontains')
-    area = filters.CharFilter(field_name='area__id')
-    status = filters.CharFilter(field_name='status__id')
     manufacturers = filters.CharFilter(field_name='manufacturers__id')
     stock_finish = filters.CharFilter(field_name='stock_finish')
+    status_list = filters.CharFilter(method='filter_status_list')
+    area_list = filters.CharFilter(method='filter_area_list')
+    user = filters.CharFilter(field_name='manager',lookup_expr='icontains')
+    builder = filters.CharFilter(field_name='builders__name', lookup_expr='icontains')
+
+    def filter_area_list(self, queryset, name, value):
+        value_list = value.split(',')
+        return queryset.filter(area__id__in=value_list)
+
+    def filter_status_list(self, queryset, name, value):
+        value_list = value.split(',')
+        return queryset.filter(status__id__in=value_list)
 
     class Meta:
         model = models.Project

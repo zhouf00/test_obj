@@ -23,7 +23,7 @@ class Market(BaseModel):
     traceTime = models.DateTimeField(blank=True, null=True, verbose_name='跟进时间')
     amount = models.FloatField(default=0, blank=True, null=True, verbose_name='漏额')
 
-    #
+    # 天数
     days = 0
 
     type = models.ManyToManyField(
@@ -32,10 +32,11 @@ class Market(BaseModel):
         related_name='market'
     )
 
-    user = models.ManyToManyField(
+    user = models.ForeignKey(
         to='personnel.User',
-        db_constraint=False,
-        related_name='market'
+        on_delete=models.CASCADE,
+        related_name='market',
+        blank=True, null=True
     )
 
     @property
@@ -55,8 +56,8 @@ class Market(BaseModel):
         return d
 
     @property
-    def userList(self):
-        return self.user.values('id', 'name', 'username')
+    def userInfo(self):
+        return self.user.info
 
     class Meta:
         verbose_name = '商机信息表'
@@ -116,4 +117,32 @@ class RateRecord(models.Model):
 
     class Meta:
         verbose_name = '命中率过程记录'
+        verbose_name_plural = verbose_name
+
+
+class MarketHistory(models.Model):
+
+    estimated_amount = models.FloatField(default=0, blank=True, null=True, verbose_name='预额')
+    amount = models.FloatField(default=0, blank=True, null=True, verbose_name='漏额')
+    rate_0 = models.FloatField(default=0, blank=True, null=True, verbose_name='0%预额')
+    rate_0_t = models.SmallIntegerField(default=0, blank=True, null=True, verbose_name='0%个数')
+    rate_025 = models.FloatField(default=0, blank=True, null=True, verbose_name='25%预额')
+    rate_025_t = models.SmallIntegerField(default=0, blank=True, null=True, verbose_name='25%个数')
+    rate_050 = models.FloatField(default=0, blank=True, null=True, verbose_name='50%预额')
+    rate_050_t = models.SmallIntegerField(default=0, blank=True, null=True, verbose_name='50%个数')
+    rate_075 = models.FloatField(default=0, blank=True, null=True, verbose_name='75%预额')
+    rate_075_t = models.SmallIntegerField(default=0, blank=True, null=True, verbose_name='75%个数')
+    rate_100 = models.FloatField(default=0, blank=True, null=True, verbose_name='100%预额')
+    rate_100_t = models.SmallIntegerField(default=0, blank=True, null=True, verbose_name='100%个数')
+    date = models.DateTimeField(blank=True, null=True, verbose_name='日期')
+
+    user = models.ForeignKey(
+        to='personnel.User',
+        on_delete=models.CASCADE,
+        related_name='markethistory',
+        blank=True, null=True
+    )
+
+    class Meta:
+        verbose_name = '月历史记录'
         verbose_name_plural = verbose_name

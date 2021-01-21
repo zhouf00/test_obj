@@ -21,6 +21,7 @@ class MarketFilter(FilterSet):
     company = filters.CharFilter(field_name='company', lookup_expr='icontains')
     start_time = filters.DateTimeFilter(field_name='traceTime', lookup_expr='gte')
     end_time = filters.DateTimeFilter(field_name='traceTime', lookup_expr='lte')
+    department = filters.CharFilter(field_name='user__department')
 
     class Meta:
         model = models.Market
@@ -43,3 +44,10 @@ class MarketTraceFilter(FilterSet):
     class Meta:
         model = models.MarketTrace
         fields = ['market']
+
+
+class MarketHistoryFilter(FilterSet):
+
+    department = filters.CharFilter(field_name='user__department')
+    start_time = filters.DateTimeFilter(field_name='date', lookup_expr='gte')
+    end_time = filters.DateTimeFilter(field_name='date', lookup_expr='lte')

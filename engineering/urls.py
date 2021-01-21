@@ -28,9 +28,9 @@ urlpatterns = [
     url(r'^cargo/$', views.StockViewSet.as_view({'get': 'list'})),
     url(r'^cargo/create/$', views.StockViewSet.as_view({'post': 'create'})),
     url(r'^cargo/update/(?P<pk>.*)/$', views.StockViewSet.as_view({'post': 'update'})),
-    url(r'^invoice/$', views.InvoiceViewSet.as_view({'get': 'list'})),
-    url(r'^invoice/create/$', views.InvoiceViewSet.as_view({'post': 'create'})),
+    url(r'^invoice/$', views.InvoiceViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^invoice/update/$', views.InvoiceViewSet.as_view({'post': 'update'})),
+    url(r'^invoice/update_time/(?P<pk>.*)/$', views.InvoiceUpdateViewSet.as_view({'post': 'update'})),
 
     # 标签
     url(r'^projectTag/manufacturer/$', views.ProjectManufacturerViewSet.as_view({'get': 'list', 'post': 'create'})),

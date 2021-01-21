@@ -50,7 +50,6 @@ class MyRequest:
             data.update(userId)
             return data
 
-
     def get_info(self, userid):
         user_info = self._get_userInfo(userid).json()
         # print('userinfo', user_info)

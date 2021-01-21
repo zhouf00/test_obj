@@ -12,4 +12,8 @@ urlpatterns = [
 
     url(r'^raterecord/$', views.RateRecordViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^raterecord/update/(?P<pk>.*)/$', views.RateRecordViewSet.as_view({'post': 'update'})),
+
+    url(r'history/$', views.MarketHistoryViewSet.as_view({'get':'list', 'post': 'create'})),
+    url(r'history/update/(?P<pk>.*)/$', views.MarketHistoryViewSet.as_view({'put': 'update'})),
+    url(r'history/annals/$', views.AnnalsViewSet.as_view()),
 ]

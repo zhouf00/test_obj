@@ -176,6 +176,8 @@ class Contract(BaseModel):
         verbose_name_plural = verbose_name
 
     # 承包商
+
+
 class Outsourcer(BaseModel):
 
     type = models.CharField(max_length=32, blank=True, null=True, verbose_name='承包商类型')
@@ -245,6 +247,7 @@ class Invoice(BaseModel):
     title = models.CharField(max_length=32, verbose_name='货物名称')
     type = models.CharField(max_length=32,blank=True, null=True,  verbose_name='发货类型')
     count = models.IntegerField(blank=True, null=True, verbose_name='发货数量')
+    invoice_time = models.DateTimeField(blank=True, null=True, verbose_name='加入时间')
     memo = models.TextField(blank=True, null=True, verbose_name='备注')
     user = models.ForeignKey('personnel.User', on_delete=models.CASCADE, verbose_name='发货人')
 

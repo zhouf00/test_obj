@@ -112,7 +112,7 @@ class UserModelSerializer(serializers.ModelSerializer):
         model = models.User
         fields = ['id', 'username', 'mobile', 'name', 'last_login', 'gender', 'avatar',
                   'is_active', 'email', 'position', 'auth',
-                  'menus',
+                  'menus','markethistoryInfo'
                   ]
 
 
@@ -162,7 +162,7 @@ class UpdateDeptModelSerializer(serializers.Serializer):
 
     def validate(self, attrs):
         # attrs['users'] = attrs.pop('member')
-        print('修改', self.instance, attrs)
+        # print('修改', self.instance, attrs)
         return attrs
 
     def update(self, instance, validated_data):
@@ -195,7 +195,7 @@ class DeptListModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Structure
-        fields = ['id', 'name', 'childrenList']
+        fields = ['id','deptid', 'name', 'childrenList']
 
 
 class DeptUserUpdateModelSerializer(serializers.ModelSerializer):

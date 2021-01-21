@@ -35,7 +35,6 @@ class LoginAPIView(APIView):
 
 
 class LogoutAPIView(APIView):
-    authentication_classes = [JWTAuthentication]
 
     def post(self, request, *args, **kwargs):
         user_ser = serializers.LogoutModelSerializer(request.user, many=False)
@@ -86,8 +85,6 @@ class auth2APIView(APIView):
 
 
 class UserViewSet(ModelViewSet):
-
-    # authentication_classes = [JWTAuthentication]
 
     def info(self, request, *args, **kwargs):
         # 拿到前台登录信息，交给序列化类，规则：帐号用usr传，密码用pwd传
@@ -163,15 +160,12 @@ class DeptToUserViewSet(APIView):
         # print(d.values())
         d.exclude(user__in=request_data['userList']).delete()
         obj_list = []
-        # print(len(d), d.values())
         if len(request_data['userList']) > len(d):
             for var in request_data['userList']:
                 if not d.filter(user=var):
                     obj_list.append(models.DeptToUser(department_id=request_data['department'],user_id=var))
-            # print(obj_list)
             models.DeptToUser.objects.bulk_create(obj_list)
         else:
-            # print('结束')
             pass
         return APIResponse(results=request.data)
 

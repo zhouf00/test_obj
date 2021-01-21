@@ -1,6 +1,7 @@
 from rest_framework import serializers
 
 from . import models
+from personnel.models import User
 
 class MarketModelSerializer(serializers.ModelSerializer):
 
@@ -12,7 +13,7 @@ class MarketModelSerializer(serializers.ModelSerializer):
                   'count', 'estimated_time', 'estimated_amount', 'hit_rate', 'memo', 'create_time','user',
                   'amount', 'traceTime','type',
                   # 自定义字段
-                  'raterecordList', 'userList', 'typeList', 'totalDays'
+                  'raterecordList', 'userInfo', 'typeList', 'totalDays'
                   ]
 
 
@@ -37,6 +38,7 @@ class LinkmanModelSerializer(serializers.ModelSerializer):
         model = models.Linkman
         fields = '__all__'
 
+
 class RateRecordModelSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -47,3 +49,10 @@ class RateRecordModelSerializer(serializers.ModelSerializer):
                 'required': False
             },
         }
+
+
+class MarketHistoryModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.MarketHistory
+        fields = ['id','user', 'amount', 'estimated_amount']

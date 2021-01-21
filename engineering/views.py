@@ -35,7 +35,7 @@ class ProjectViewSet(ModelViewSet):
                 # self.isleader = True
                 self.queryset = self.queryset.filter(manager__in=self.request.user.deptmembers[1]).distinct()
             else:
-                print('你不是部门领导')
+                # print('你不是部门领导')
                 # self.isleader = False
                 self.queryset = self.queryset.filter(manager=self.request.user.name).distinct()
         return self.queryset
@@ -106,6 +106,12 @@ class InvoiceViewSet(ProjectUpdateViewSet):
     pagination_class = MyPageNumberPagination
     filter_backends = [SearchFilter, DjangoFilterBackend]
     filter_class = filters.InvoiceFilterSet
+
+
+class InvoiceUpdateViewSet(ModelViewSet):
+
+    queryset = models.Invoice
+    serializer_class = serializers.InvoiceUpdateModelSerializer
 
 
 class InvoiceImageViewSet(ProjectUpdateViewSet):
