@@ -1,4 +1,5 @@
 from . import models
+import datetime, time
 # 自定义过滤器，接口：?limit=显示的条数
 class LimitFilter:
     def filter_queryset(self, request, queryset, view):
@@ -24,8 +25,16 @@ class ProjectFilterSet(FilterSet):
     stock_finish = filters.CharFilter(field_name='stock_finish')
     status_list = filters.CharFilter(method='filter_status_list')
     area_list = filters.CharFilter(method='filter_area_list')
+    monitortype_list = filters.CharFilter(field_name='monitor_type')
     user = filters.CharFilter(field_name='manager',lookup_expr='icontains')
     builder = filters.CharFilter(field_name='builders__name', lookup_expr='icontains')
+    salesman = filters.CharFilter(field_name='salesman__name', lookup_expr='icontains')
+    diagnosisman = filters.CharFilter(field_name='diagnosisman__name', lookup_expr='icontains')
+    begin_time = filters.CharFilter(method='filter_begin_time')
+
+    def filter_begin_time(self, queryset, name, value):
+        begin_time = time.strftime("%Y", time.localtime(int(value)/1000))
+        return queryset.filter(begin_time__year=begin_time)
 
     def filter_area_list(self, queryset, name, value):
         value_list = value.split(',')
@@ -91,4 +100,21 @@ class ContractFilterSet(FilterSet):
 
     class Meta:
         model = models.Contract
+        fields = ['project']
+
+
+class MonitorNumberFilterSet(FilterSet):
+
+    project = filters.CharFilter(field_name='project__id')
+
+    class Meta:
+        model = models.MonitorNumber
+        fields = ['project']
+
+class ProjectStatusTimeFilterSet(FilterSet):
+
+    project = filters.CharFilter(field_name='project__id')
+
+    class Meta:
+        model = models.ProjectStatusTime
         fields = ['project']

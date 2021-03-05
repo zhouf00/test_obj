@@ -13,7 +13,7 @@ from utils.pagenations import MyPageNumberPagination
 
 class MarketViewSet(ModelViewSet):
 
-    queryset = models.Market.objects.all().order_by('-amount')
+    queryset = models.Market.objects.filter(is_delete=False).order_by('-amount')
     serializer_class = serializers.MarketModelSerializer
 
     pagination_class = MyPageNumberPagination
@@ -35,11 +35,11 @@ class MarketViewSet(ModelViewSet):
             if self.request.user.deptList:
                 # print('你是部门领导')
                 self.isleader = True
-                self.queryset = self.queryset.filter(user__username__in=self.request.user.deptmembers[0]).distinct()
+                self.queryset = self.queryset.filter(Q(user__username__in=self.request.user.deptmembers[0])|Q(coadjutant=self.request.user.id)).distinct()
             else:
                 # print('你不是部门领导')
                 self.isleader = False
-                self.queryset = self.queryset.filter(user=self.request.user.id).distinct()
+                self.queryset = self.queryset.filter(Q(user=self.request.user.id)|Q(coadjutant=self.request.user.id)).distinct()
         return self.queryset
 
     def create(self, request, *args, **kwargs):
@@ -83,6 +83,11 @@ class MarketViewSet(ModelViewSet):
 
         serializer = self.get_serializer(queryset, many=True)
         return APIResponse(results=serializer.data)
+
+
+class MarketDeleteViewSet(ModelViewSet):
+    queryset = models.Market.objects.filter(is_delete=False).order_by('-amount')
+    serializer_class = serializers.MarketDeleteModelSerializer
 
 
 class MarketTraceViewSet(ModelViewSet):
@@ -263,27 +268,28 @@ class AnnalsViewSet(APIView):
     def get(self, request, *args, **kwargs):
         request_user = request.query_params
         queryset = self.get_queryset()
-        if 'department' in request_user:
-            queryset = queryset.filter(user__department=request_user['department'])
-        else:
-            pass
-        if 'user' in request_user:
-            queryset = queryset.filter(user__id=int(request_user['user']))
-        else:
-            pass
+
         date = datetime.datetime.now()
         users_obj = User.objects.all()
+        # print(request_user)
+        if 'sw' in request_user and request_user['sw'] == 'true':
+            reload = True
+        else:
+            reload = False
         # 每日更新
         rate_dict = {'rate_0': 0, 'rate_025': 0.25, 'rate_050': 0.5, 'rate_075': 0.75, 'rate_100': 1}
         # dict1 = {'amount':0, 'estimated_amount': 0}
         queryset_month = queryset.filter(date__year=date.strftime('%Y'), date__month=date.strftime('%m'))
-        if not queryset_month.values() or queryset_month[0].date.strftime('%Y%m%d') != date.strftime('%Y%m%d'):
+        print(queryset_month[0].date.strftime('%Y%m%d'))
+        if reload or not queryset_month.values() or queryset_month[0].date.strftime('%Y%m%d') != date.strftime('%Y%m%d'):
             # print('更新')
-            markets_obj = models.Market.objects.filter(traceTime__year=date.strftime('%Y'), traceTime__month=date.strftime('%m'))
+            markets_obj = models.Market.objects.filter(traceTime__year=date.strftime('%Y'),
+                                                       traceTime__month=date.strftime('%m'),)
             users = markets_obj.exclude(user=None).values('user').distinct()
             for user in users:
                 dict1 = {'amount': 0, 'estimated_amount': 0}
-                market_obj = markets_obj.filter(user__id=user['user'])
+                # 获取未删除的项目
+                market_obj = markets_obj.filter(user__id=user['user'], is_delete=False)
                 user_obj = users_obj.filter(id=user['user'])
                 if user_obj:
                     for key, value in rate_dict.items():
@@ -303,8 +309,14 @@ class AnnalsViewSet(APIView):
                     )
 
         # 查询
-        # if 'user' in request.query_params:
-        #     queryset = queryset.filter(user=request.query_params['user'])
+        if 'department' in request_user:
+            queryset = queryset.filter(user__department=request_user['department'])
+        else:
+            pass
+        if 'user' in request_user:
+            queryset = queryset.filter(user__id=int(request_user['user']))
+        else:
+            pass
         months = ['1','2', '3','4','5', '6', '7','8','9', '10', '11', '12']
         annals_list = []
         tmp_chain = 0
@@ -324,7 +336,6 @@ class AnnalsViewSet(APIView):
                 dict1['chain'] = dict1['amount']-tmp_chain
                 tmp_chain = dict1['amount']
             annals_list.append(dict1)
-        # print(annals_list)
         return APIResponse(
             results=annals_list
         )
@@ -365,5 +376,4 @@ class AnnalsViewSet(APIView):
             res['amount'] = 0.0
         if 'estimated_amount' in res and not res['estimated_amount']:
             res['estimated_amount'] = 0.0
-
         return res

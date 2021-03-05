@@ -1,10 +1,11 @@
 # Django脚本化启动
 import os, django
-from django.db.models import Count, Sum
+import time,datetime
+from django.db.models import Count, Sum, Q
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'test_obj.settings')
 django.setup()
 
-from engineering.models import Project, Manufacturer
+from engineering.models import Project, Manufacturer, ProjectStatusTime, ProjectStatus
 from personnel import models
 from rbac.models import Menu, Auth
 from product import models as product_models
@@ -14,12 +15,21 @@ from APPS.crm import models as crm_models
 # 项目管理查询
 ##############
 project = Project.objects.filter(area=1).order_by('-update_time')
-# print(len(project))
+print(Project.objects.filter(begin_time__year='2021'))
+# print(Project.objects.filter(status_))
+# print(ProjectStatusTime.objects.filter(status_id=1))
+# print(time.strftime("%Y", time.localtime(int('1577808000000')/1000)))
+p = Project.objects.all()
+tag_list = list(ProjectStatus.objects.values('title'))
+print(tag_list)
+for var in tag_list:
+    var['count'] = p.filter(status__title=var['title']).count()
+    print(var)
+tag_list.append({'title':'全部'})
 
 ##############
 # 销售管理查询
 ##############
-import datetime
 # print(crm_models.Market.objects.filter(pk=15).first().hit_rate)
 # print(crm_models.RateRecord.objects.filter(hit_rate=0.5).values())
 # 时间计算
@@ -42,7 +52,8 @@ import datetime
 # department_member = models.User.objects.filter(department__name='销售二部').values('username')
 # users = [user['username']  for user in department_member]
 # print(users)
-print(crm_models.Market.objects.filter(user__department=3))
+# print(crm_models.Market.objects.filter(user__department=3))
+# print(crm_models.Market.objects.filter(Q(user=3)| Q(coadjutant=6)).values('title'))
 
 # 历史记录
 # print(datetime.datetime.strptime('2020/12/20','%Y/%m/%d'))
@@ -52,4 +63,4 @@ q = crm_models.MarketHistory.objects.filter(date__year='2020',date__month='12').
 time = datetime.datetime.now()
 # print(crm_models.MarketHistory.objects.filter(date__year=time.strftime('%Y'),date__month=time.strftime('%m'),date__day=time.strftime('%d')))
 #
-print(crm_models.MarketHistory.objects.filter(user__department=4).values('user_id'))
+# print(crm_models.MarketHistory.objects.filter(user__department=4).values('user_id'))

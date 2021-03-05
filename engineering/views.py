@@ -1,6 +1,8 @@
+from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
+from django.db.models import Q
 
 from engineering import models, serializers, filters
 
@@ -40,11 +42,50 @@ class ProjectViewSet(ModelViewSet):
                 self.queryset = self.queryset.filter(manager=self.request.user.name).distinct()
         return self.queryset
 
+    # def create(self, request, *args, **kwargs):
+    #     print(request.data)
+
+
+class ProjectClassifyViewSet(APIView):
+
+    queryset = models.Project.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        tag_list = list(models.ProjectStatus.objects.values('title', 'id').order_by('sort'))
+        for var in tag_list:
+            var['count'] = self.queryset.filter(status__title=var['title']).count()
+        tag_list.append({'title': '项目总数', 'id': 0, 'count': self.queryset.count()})
+        return APIResponse(results=tag_list)
+
 
 class ProjectCreateViewSet(ModelViewSet):
 
     queryset = models.Project.objects.all().order_by('id')
     serializer_class = serializers.CreateProjectModelSerializer
+
+
+class ProjectStatusTimeViewSet(ModelViewSet):
+    queryset = models.ProjectStatusTime.objects.all()
+    serializer_class = serializers.ProjectStatusTimeSerializer
+
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+    filter_class = filters.ProjectStatusTimeFilterSet
+
+    def my_post(self, request, *args, **kwargs):
+        request_data = request.data
+        # 没有时创建
+        if not self.queryset.filter(Q(project=request_data['project']) & Q(status_id=request_data['status'])):
+            serializer = self.get_serializer(data=request_data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+        else:
+            partial = kwargs.pop('partial', False)
+            instance = self.queryset.filter(Q(project=request_data['project']) & Q(status_id=request_data['status'])).first()
+            serializer = self.get_serializer(instance, data=request_data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+        models.Project.objects.update_or_create(defaults={'status_id':request_data['status']},pk=request_data['project'])
+        return APIResponse(results=request_data)
 
 
 class IdcRoomViewSet(ProjectUpdateViewSet):
@@ -150,7 +191,7 @@ class ProjectTypeViewSet(ModelViewSet):
 
 class ProjectStatusViewSet(ModelViewSet):
 
-    queryset = models.ProjectStatus.objects.all()
+    queryset = models.ProjectStatus.objects.all().order_by('sort')
     serializer_class = serializers.ProjectStatusModelSerializer
 
 
@@ -177,5 +218,5 @@ class MonitorNumberViewSet(ModelViewSet):
     queryset = models.MonitorNumber.objects.all()
     serializer_class = serializers.MonitorNumberModelSerializer
 
+    filter_class = filters.MonitorNumberFilterSet
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    search_fields = ['project__id']

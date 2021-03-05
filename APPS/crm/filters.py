@@ -18,10 +18,12 @@ class MarketFilter(FilterSet):
 
     title = filters.CharFilter(field_name='title', lookup_expr='icontains')
     user = filters.CharFilter(field_name='user__name', lookup_expr='icontains')
+    coadjutant = filters.CharFilter(field_name='coadjutant__name', lookup_expr='icontains')
     company = filters.CharFilter(field_name='company', lookup_expr='icontains')
-    start_time = filters.DateTimeFilter(field_name='traceTime', lookup_expr='gte')
-    end_time = filters.DateTimeFilter(field_name='traceTime', lookup_expr='lte')
+    end_traceTime = filters.DateTimeFilter(field_name='traceTime', lookup_expr='lte')
     department = filters.CharFilter(field_name='user__department')
+    start_time = filters.DateTimeFilter(field_name='estimated_time', lookup_expr='gte')
+    end_time = filters.DateTimeFilter(field_name='estimated_time', lookup_expr='lte')
 
     class Meta:
         model = models.Market

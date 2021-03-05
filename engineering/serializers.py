@@ -60,11 +60,12 @@ class ProjectModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Project
         fields = [
-            'id', 'is_delete', 'name', 'address', 'sn', 'update_time', 'entrance_time', 'finish_time',
-            'facility_count', 'manager', 'memo', 'pj_sn', 'stock_finish',
+            'id', 'is_delete', 'name', 'address', 'sn', 'update_time', 'entrance_time', 'finish_time', 'begin_time',
+            'facility_count', 'manager', 'memo', 'pj_sn', 'stock_finish', 'product', 'manufacturers',
+            'type', 'province', 'monitor_type', 'area', 'working_env', 'diagnosisman', 'salesman', 'builders',
             # 自定义信息
-            'monitortypeList', 'typeInfo', 'statusInfo', 'areaInfo', 'working_envInfo', 'buildersList',
-             'manufacturersList', 'monitorNumberList'
+            'monitortypeList', 'typeInfo', 'statusInfo', 'areaInfo', 'working_envInfo', 'manufacturersList',
+            'monitorNumberList', 'diagnosismanList', 'buildersList'
         ]
 
         extra_kwargs = {
@@ -80,7 +81,17 @@ class ProjectModelSerializer(serializers.ModelSerializer):
             'finish_time': {
                 'required': False
             },
+            'product': {
+                'required': False
+            }
         }
+
+
+# 项目时间轴
+class ProjectStatusTimeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProjectStatusTime
+        fields = ['id', 'status', 'time', 'user', 'project', 'info']
 
 
 # 承包信息序列化

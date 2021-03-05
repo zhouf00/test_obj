@@ -6,8 +6,13 @@ from . import views
 urlpatterns = [
     # 项目信息
     url(r'^project/$', views.ProjectViewSet.as_view({'get': 'list'})),
-    url(r'^project/create/$', views.ProjectCreateViewSet.as_view({'post': 'create'})),
-    url(r'^project/updateInfo/(?P<pk>.*)/$', views.ProjectCreateViewSet.as_view({'get': 'retrieve', 'post': 'update'})),
+    url(r'^project/create/$', views.ProjectViewSet.as_view({'post': 'create'})),
+    url(r'^project/update/(?P<pk>.*)/$', views.ProjectViewSet.as_view({'post': 'update'})),
+    url(r'^project/classify/$', views.ProjectClassifyViewSet.as_view()),
+    # url(r'^project/updateInfo/(?P<pk>.*)/$', views.ProjectCreateViewSet.as_view({'get': 'retrieve', 'post': 'update'})),
+
+    # 时间轴
+    url(r'^projectstatustime/$', views.ProjectStatusTimeViewSet.as_view({'get': 'list', 'post': 'my_post'})),
 
     # 项目更进
     url(r'^trace/$', views.ProjectTraceViewSet.as_view({'get': 'list', 'post':'create'})),
@@ -52,7 +57,7 @@ urlpatterns = [
     url(r'^projectTag/workingenv/update/(?P<pk>.*)/$', views.ProjectWorkingEnvViewSet.as_view({'post': 'update'})),
 
     url(r'^projectTag/StockFinish/$', views.StockViewSet.as_view({'get': 'list', 'post': 'create'})),
-    url(r'^projectTag/StockFinish/update/(?P<pk>.*)/$', views.StockViewSet.as_view({'post': 'update'})),
+    url(r'^projectTag/StockFinish/(?P<pk>.*)/$', views.StockViewSet.as_view({'post': 'update'})),
 
     url(r'^projectTag/monitornumber/$', views.MonitorNumberViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^projectTag/monitornumber/update/(?P<pk>.*)/$', views.MonitorNumberViewSet.as_view({'post': 'update'})),

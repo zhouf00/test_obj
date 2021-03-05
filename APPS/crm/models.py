@@ -39,6 +39,13 @@ class Market(BaseModel):
         blank=True, null=True
     )
 
+    coadjutant = models.ManyToManyField(
+        to='personnel.User',
+        db_constraint=False,
+        related_name='market_co',
+        blank=True
+    )
+
     @property
     def typeList(self):
         return self.type.values('id', 'title')

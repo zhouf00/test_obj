@@ -4,6 +4,7 @@ from . import views
 urlpatterns = [
     url(r'^market/$', views.MarketViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^market/update/(?P<pk>.*)/$', views.MarketViewSet.as_view({'get': 'retrieve', 'post': 'update'})),
+    url(r'^market/delete/(?P<pk>.*)/$', views.MarketDeleteViewSet.as_view({'post': 'update'})),
 
     url(r'^markettrace/$', views.MarketTraceViewSet.as_view({'get': 'list', 'post': 'create'})),
 

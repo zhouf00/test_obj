@@ -19,6 +19,7 @@ class Project(BaseModel):
 
     image = models.ImageField(upload_to=upload_path_image, default='img/default.jpg', blank=True, null=True,
                               verbose_name='默认图片')
+    begin_time = models.DateTimeField(blank=True, null=True, verbose_name='项目开始时间')
     entrance_time = models.DateTimeField(blank=True, null=True, verbose_name='入场时间')
     finish_time = models.DateTimeField(blank=True, null=True, verbose_name='完成时间')
     memo = models.TextField(blank=True, null=True, verbose_name='备注说明')
@@ -28,10 +29,31 @@ class Project(BaseModel):
     # 坐标待使用
     # x = models.DecimalField(max_digits=10, decimal_places=5)
 
+    salesman = models.ManyToManyField(
+        to='personnel.User',
+        db_constraint=False,
+        related_name='sales_project',
+        blank=True,
+    )
+
+    diagnosisman = models.ManyToManyField(
+        to='personnel.User',
+        db_constraint=False,
+        related_name='diagnosis_project',
+        blank=True,
+    )
+
     manufacturers = models.ManyToManyField(
         to='Manufacturer',
         db_constraint=False,
         related_name='project'
+    )
+
+    product = models.ManyToManyField(
+        to='product.Product',
+        db_constraint=False,
+        related_name='project',
+        blank=True,
     )
 
     type = models.ForeignKey(
@@ -72,12 +94,16 @@ class Project(BaseModel):
         return self.number.values('title','number')
 
     @property
-    def buildersList(self):
-        return self.builders.values('id','name')
-
-    @property
     def manufacturersList(self):
         return self.manufacturers.values('id', 'title')
+
+    @property
+    def diagnosismanList(self):
+        return self.diagnosisman.values('id', 'name')
+
+    @property
+    def buildersList(self):
+        return self.builders.values('id', 'name')
 
     @property
     def typeInfo(self):
@@ -175,9 +201,7 @@ class Contract(BaseModel):
         verbose_name = '承包信息'
         verbose_name_plural = verbose_name
 
-    # 承包商
-
-
+# 承包商
 class Outsourcer(BaseModel):
 
     type = models.CharField(max_length=32, blank=True, null=True, verbose_name='承包商类型')
@@ -308,12 +332,41 @@ class EventLog(BaseModel):
     detail = models.TextField(verbose_name='事件详情')
     memo = models.TextField(blank=True, null=True, verbose_name='备注')
 
-
-
     class Meta:
         verbose_name = '日志'
         verbose_name_plural = verbose_name
 
+
+class ProjectStatusTime(models.Model):
+
+    project = models.ForeignKey(
+        to='Project',
+        on_delete=models.CASCADE,
+        related_name='status_time',
+        blank=True, null=True)
+
+    status = models.ForeignKey(to='ProjectStatus', on_delete=models.CASCADE, related_name='project_status')
+    time = models.DateTimeField(blank=True, null=True, verbose_name='加入状态时间')
+    isTrue = models.BooleanField(default=True)
+    user = models.CharField(max_length=64, verbose_name='提交人')
+
+    @property
+    def info(self):
+        var = {
+            'id': self.id,
+            'title': self.status.title,
+            'isTrue': self.isTrue,
+            'user': self.user,
+            'time': self.time
+        }
+        return var
+
+    def __str__(self):
+        return self.status.title
+
+    class Meta:
+        verbose_name = '项目状态时间轴'
+        verbose_name_plural = verbose_name
 
 ##########
 # 标签模型
@@ -326,7 +379,7 @@ class MonitorType(models.Model):
         related_name='monitor_type',
         blank=True
     )
-    title = models.CharField(max_length=64, verbose_name='监测名称')
+    title = models.CharField(max_length=64, unique=True, verbose_name='监测名称')
 
     @property
     def info(self):
@@ -346,7 +399,7 @@ class MonitorType(models.Model):
 
 class ProjectWorkingEnv(models.Model):
 
-    title = models.CharField(max_length=64, verbose_name='环境名称')
+    title = models.CharField(max_length=64, unique=True, verbose_name='环境名称')
 
     @property
     def info(self):
@@ -366,7 +419,8 @@ class ProjectWorkingEnv(models.Model):
 
 class ProjectStatus(models.Model):
 
-    title = models.CharField(max_length=64, verbose_name='状态名称')
+    title = models.CharField(max_length=64, unique=True, verbose_name='状态名称')
+    sort = models.SmallIntegerField(blank=True, null=True, verbose_name='排序')
 
     @property
     def info(self):
@@ -386,7 +440,7 @@ class ProjectStatus(models.Model):
 
 class ProjectArea(models.Model):
 
-    title = models.CharField(max_length=64, verbose_name='区域名称')
+    title = models.CharField(max_length=64, unique=True, verbose_name='区域名称')
 
     @property
     def info(self):
@@ -406,7 +460,7 @@ class ProjectArea(models.Model):
 
 class ProjectType(models.Model):
 
-    title = models.CharField(max_length=64, verbose_name='项目类型')
+    title = models.CharField(max_length=64, unique=True, verbose_name='项目类型')
 
     @property
     def info(self):
@@ -426,7 +480,7 @@ class ProjectType(models.Model):
 
 class StockFinish(models.Model):
 
-    title = models.CharField(max_length=64, verbose_name='标签')
+    title = models.CharField(max_length=64, unique=True, verbose_name='标签')
 
     @property
     def info(self):

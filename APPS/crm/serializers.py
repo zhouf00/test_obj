@@ -11,10 +11,16 @@ class MarketModelSerializer(serializers.ModelSerializer):
         model = models.Market
         fields = ['id', 'title', 'customer', 'company', 'address', 'designing_institute', 'manufacturer', 'sn',
                   'count', 'estimated_time', 'estimated_amount', 'hit_rate', 'memo', 'create_time','user',
-                  'amount', 'traceTime','type',
+                  'amount', 'traceTime','type', 'coadjutant',
                   # 自定义字段
                   'raterecordList', 'userInfo', 'typeList', 'totalDays'
                   ]
+
+
+class MarketDeleteModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Market
+        fields = ['id', 'is_delete']
 
 
 class MarketUpdateRateModelSerializer(serializers.ModelSerializer):
