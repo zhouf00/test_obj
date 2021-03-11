@@ -1,10 +1,12 @@
+import time
 from rest_framework.views import APIView
-from rest_framework.viewsets import ModelViewSet
+from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.filters import SearchFilter
 from django_filters.rest_framework import DjangoFilterBackend
-from django.db.models import Q
+from django.db.models import Q, Sum
 
 from engineering import models, serializers, filters
+from personnel import models as personnel_models
 
 from utils.response import APIResponse
 from utils.pagenations import MyPageNumberPagination
@@ -42,20 +44,99 @@ class ProjectViewSet(ModelViewSet):
                 self.queryset = self.queryset.filter(manager=self.request.user.name).distinct()
         return self.queryset
 
-    # def create(self, request, *args, **kwargs):
-    #     print(request.data)
+
+class ProjectClassifyViewSet(GenericViewSet):
+
+    queryset = models.Project.objects.filter(is_delete=False).order_by('-update_time')
+    serializer_class = serializers.ProjectModelSerializer
+
+    pagination_class = MyPageNumberPagination
+    filter_class = filters.ProjectFilterSet
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+
+    def get_queryset(self):
+        # 拿到管理员身份
+        role = self.request.user.roleList
+        if '超级管理员' in role:
+            # print('你是管理员')
+            pass
+        elif '普通用户'in role and len(role)>1:
+            pass
+        else:
+            pass
+            # 拿到部门领导身份
+            if self.request.user.deptList:
+                # print('你是部门领导')
+                # self.isleader = True
+                self.queryset = self.queryset.filter(manager__in=self.request.user.deptmembers[1]).distinct()
+            else:
+                # print('你不是部门领导')
+                # self.isleader = False
+                self.queryset = self.queryset.filter(manager=self.request.user.name).distinct()
+        return self.queryset
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.queryset)
+        tag_list = list(models.ProjectStatus.objects.values('title', 'id').order_by('sort'))
+
+        for var in tag_list:
+            var.update({
+                'count':queryset.filter(status__title=var['title']).count(),
+                'facility_count':queryset.filter(status__title=var['title']).aggregate(count=Sum('facility_count'))['count']
+            })
+        tag_list.append({
+            'title': '项目总数',
+            'id': 0,
+            'count': queryset.count(),
+            'facility_count': queryset.aggregate(count=Sum('facility_count'))['count']
+        })
+        return APIResponse(results=tag_list)
 
 
-class ProjectClassifyViewSet(APIView):
+class ProjectOverview(APIView):
 
-    queryset = models.Project.objects.all()
+    queryset = models.Project.objects.filter(is_delete=False).order_by('-update_time')
+    query_user = personnel_models.User.objects.exclude(id=1)
 
     def get(self, request, *args, **kwargs):
-        tag_list = list(models.ProjectStatus.objects.values('title', 'id').order_by('sort'))
-        for var in tag_list:
-            var['count'] = self.queryset.filter(status__title=var['title']).count()
-        tag_list.append({'title': '项目总数', 'id': 0, 'count': self.queryset.count()})
-        return APIResponse(results=tag_list)
+        project_dict = {}
+
+        queryset = self.queryset.filter(Q(builders__isnull=False) |Q(priority__isnull=False)).values(
+            'id', 'name', 'priority__title', 'province', 'status__title', 'builders__name','update_time')
+        query_user = self.query_user.filter(project__isnull=True).filter(department__in=[6]).filter(is_active=1)
+        users = []
+        # print(users)
+        user_list = users
+        for var in queryset:
+            # print(var)
+            if 'id' in project_dict and var['id'] in project_dict :
+                project_dict[var['id']]['builders'] += '%s'%var['builders__name']
+            else:
+                project_dict[var['id']] = {
+                    'id': var['id'],
+                    'name':var['name'],
+                    'province':var['province'],
+                    'priority': var['priority__title'],
+                    'status': var['status__title'],
+                    'builders': var['builders__name'],
+                    'update_time': var['update_time'].strftime('%Y-%m-%d'),
+                }
+            if var['builders__name']:
+                user_list.append({
+                    'id': var['id'],
+                    'name': var['name'],
+                    'province': var['province'],
+                    'priority': var['priority__title'],
+                    'status': var['status__title'],
+                    'builders': var['builders__name'],
+                    'update_time': var['update_time'].strftime('%Y-%m-%d '),
+                })
+        user_list+=[{'builders': var['name'], 'status': '待命'} for var in query_user.values('name')]
+        res = {
+            'project': project_dict.values(),
+            'user': user_list
+        }
+        return APIResponse(results=res)
 
 
 class ProjectCreateViewSet(ModelViewSet):
@@ -177,6 +258,12 @@ class ProjectTraceViewSet(ProjectUpdateViewSet):
 ######
 # 标签组
 #####
+class ProjectPriorityViewSet(ModelViewSet):
+
+    queryset = models.ProjectPriority.objects.all()
+    serializer_class = serializers.ProjectPrioritySerializer
+
+
 class MonitorTypeViewSet(ModelViewSet):
 
     queryset = models.MonitorType.objects.all()
@@ -220,3 +307,10 @@ class MonitorNumberViewSet(ModelViewSet):
 
     filter_class = filters.MonitorNumberFilterSet
     filter_backends = [SearchFilter, DjangoFilterBackend]
+
+
+class TraceStatusViewSet(ModelViewSet):
+
+    queryset = models.TraceStatus.objects.all()
+    serializer_class = serializers.TraceStatusSerializer
+

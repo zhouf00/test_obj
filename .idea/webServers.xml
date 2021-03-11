@@ -10,6 +10,14 @@
           <option name="port" value="22" />
         </fileTransfer>
       </webServer>
+      <webServer id="13c58a14-5c89-46cf-9617-8416925eb452" name="tmp" url="http://10.100.0.150">
+        <fileTransfer host="10.100.0.150" port="22" rootFolder="/data/wwwroot/test_obj" accessType="SFTP">
+          <advancedOptions>
+            <advancedOptions dataProtectionLevel="Private" passiveMode="true" shareSSLContext="true" />
+          </advancedOptions>
+          <option name="port" value="22" />
+        </fileTransfer>
+      </webServer>
     </option>
   </component>
 </project>

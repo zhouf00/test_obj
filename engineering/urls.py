@@ -8,8 +8,9 @@ urlpatterns = [
     url(r'^project/$', views.ProjectViewSet.as_view({'get': 'list'})),
     url(r'^project/create/$', views.ProjectViewSet.as_view({'post': 'create'})),
     url(r'^project/update/(?P<pk>.*)/$', views.ProjectViewSet.as_view({'post': 'update'})),
-    url(r'^project/classify/$', views.ProjectClassifyViewSet.as_view()),
-    # url(r'^project/updateInfo/(?P<pk>.*)/$', views.ProjectCreateViewSet.as_view({'get': 'retrieve', 'post': 'update'})),
+    url(r'^project/classify/$', views.ProjectClassifyViewSet.as_view({'get': 'list'})),
+
+    url(r'^project/overview/$', views.ProjectOverview.as_view()),
 
     # 时间轴
     url(r'^projectstatustime/$', views.ProjectStatusTimeViewSet.as_view({'get': 'list', 'post': 'my_post'})),
@@ -41,6 +42,9 @@ urlpatterns = [
     url(r'^projectTag/manufacturer/$', views.ProjectManufacturerViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^projectTag/manufacturer/update/(?P<pk>.*)/$', views.ProjectManufacturerViewSet.as_view({'post': 'update'})),
 
+    url(r'^projectTag/projectpriority/$', views.ProjectPriorityViewSet.as_view({'get': 'list', 'post': 'create'})),
+    url(r'^projectTag/projectpriority/update/(?P<pk>.*)/$', views.ProjectPriorityViewSet.as_view({'post': 'update'})),
+
     url(r'^projectTag/monitortype/$', views.MonitorTypeViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^projectTag/monitortype/update/(?P<pk>.*)/$', views.MonitorTypeViewSet.as_view({'post': 'update'})),
 
@@ -61,6 +65,9 @@ urlpatterns = [
 
     url(r'^projectTag/monitornumber/$', views.MonitorNumberViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^projectTag/monitornumber/update/(?P<pk>.*)/$', views.MonitorNumberViewSet.as_view({'post': 'update'})),
+
+    url(r'^projectTag/tracestatus/$', views.TraceStatusViewSet.as_view({'get': 'list', 'post': 'create'})),
+    url(r'^projectTag/tracestatus/update/(?P<pk>.*)/$', views.TraceStatusViewSet.as_view({'post': 'update'})),
 
     # 图片上传
     url(r'^invoice/img/$', views.InvoiceImageViewSet.as_view({'get': 'list'})),

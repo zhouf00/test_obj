@@ -2,6 +2,13 @@
 <project version="4">
   <component name="PublishConfigData" serverName="windit">
     <serverData>
+      <paths name="tmp">
+        <serverdata>
+          <mappings>
+            <mapping deploy="/" local="$PROJECT_DIR$" web="/" />
+          </mappings>
+        </serverdata>
+      </paths>
       <paths name="windit">
         <serverdata>
           <mappings>

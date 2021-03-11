@@ -21,7 +21,7 @@ class ProjectFilterSet(FilterSet):
 
     name = filters.CharFilter(field_name='name',lookup_expr='icontains')
     sn = filters.CharFilter(field_name='sn', lookup_expr='icontains')
-    manufacturers = filters.CharFilter(field_name='manufacturers__id')
+    # manufacturers = filters.CharFilter(field_name='manufacturers__id')
     stock_finish = filters.CharFilter(field_name='stock_finish')
     status_list = filters.CharFilter(method='filter_status_list')
     area_list = filters.CharFilter(method='filter_area_list')
@@ -46,7 +46,7 @@ class ProjectFilterSet(FilterSet):
 
     class Meta:
         model = models.Project
-        fields = ['id', 'name', 'area', 'sn', 'status', 'manufacturers', 'stock_finish']
+        fields = ['id', 'name', 'area', 'sn', 'status', 'manufacturers', 'stock_finish', 'priority']
 
 
 class OutsourcerFilterSet(FilterSet):
@@ -56,6 +56,7 @@ class OutsourcerFilterSet(FilterSet):
     class Meta:
         model = models.Outsourcer
         fields = ['title']
+
 
 class IdcRoomFilterSet(FilterSet):
 
@@ -110,6 +111,7 @@ class MonitorNumberFilterSet(FilterSet):
     class Meta:
         model = models.MonitorNumber
         fields = ['project']
+
 
 class ProjectStatusTimeFilterSet(FilterSet):
 

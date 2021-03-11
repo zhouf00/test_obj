@@ -7,7 +7,6 @@ from utils.basemodel import BaseModel, upload_path_image
 class Project(BaseModel):
 
     name = models.CharField(max_length=64, unique=True, verbose_name='项目名称')
-    priority = models.SmallIntegerField(default=1, verbose_name='优先级')
     address = models.CharField(max_length=64, verbose_name='项目地址')
     pj_sn = models.CharField(max_length=64, blank=True, null=True, verbose_name='项目编号')
     sn = models.CharField(max_length=64, blank=True, null=True, verbose_name='内部编号')
@@ -15,19 +14,18 @@ class Project(BaseModel):
     contractor = models.CharField(max_length=64, blank=True, null=True, verbose_name='承包商')
     manager = models.CharField(max_length=64, blank=True, null=True, verbose_name='项目负责人')
     province = models.CharField(max_length=64, blank=True, null=True, verbose_name='省份')
-    user_car = models.CharField(max_length=64, blank=True, null=True, verbose_name='用车')
+    use_car = models.CharField(max_length=64, blank=True, null=True, verbose_name='用车')
 
     image = models.ImageField(upload_to=upload_path_image, default='img/default.jpg', blank=True, null=True,
                               verbose_name='默认图片')
-    begin_time = models.DateTimeField(blank=True, null=True, verbose_name='项目开始时间')
-    entrance_time = models.DateTimeField(blank=True, null=True, verbose_name='入场时间')
-    finish_time = models.DateTimeField(blank=True, null=True, verbose_name='完成时间')
     memo = models.TextField(blank=True, null=True, verbose_name='备注说明')
-
     stock_finish = models.CharField(max_length=16, default='未完成', blank=True, null=True,  verbose_name='发货状态')
 
-    # 坐标待使用
-    # x = models.DecimalField(max_digits=10, decimal_places=5)
+    begin_time = models.DateTimeField(blank=True, null=True, verbose_name='项目开始时间')
+    # end_time = models.DateTimeField(blank=True, null=True, verbose_name='项目完成时间')
+    check_time = models.DateTimeField(blank=True, null=True, verbose_name='验收时间')
+    entrance_time = models.DateTimeField(blank=True, null=True, verbose_name='预计入场时间')
+    finish_time = models.DateTimeField(blank=True, null=True, verbose_name='预计完成时间')
 
     salesman = models.ManyToManyField(
         to='personnel.User',
@@ -54,6 +52,13 @@ class Project(BaseModel):
         db_constraint=False,
         related_name='project',
         blank=True,
+    )
+
+    priority = models.ForeignKey(
+        to='ProjectPriority',
+        on_delete=models.CASCADE,
+        related_name='project',
+        blank=True, null=True,
     )
 
     type = models.ForeignKey(
@@ -106,6 +111,10 @@ class Project(BaseModel):
         return self.builders.values('id', 'name')
 
     @property
+    def priorityInfo(self):
+        return self.priority.info if self.priority else {}
+
+    @property
     def typeInfo(self):
         return self.type.info if self.type else {}
 
@@ -120,6 +129,11 @@ class Project(BaseModel):
     @property
     def working_envInfo(self):
         return self.working_env.info if self.working_env else {}
+
+    @property
+    def trace_statusInfo(self):
+        res = self.trace.order_by('-create_time').values('trace_status__title', 'content')
+        return {'title': res[0]['trace_status__title'], 'content': res[0]['content']} if res else {}
 
     def __str__(self):
         return '%s' % (self.name)
@@ -200,6 +214,7 @@ class Contract(BaseModel):
     class Meta:
         verbose_name = '承包信息'
         verbose_name_plural = verbose_name
+
 
 # 承包商
 class Outsourcer(BaseModel):
@@ -305,6 +320,13 @@ class InvoiceImage(models.Model):
 # 项目跟进
 class ProjectTrace(BaseModel):
 
+    trace_status = models.ForeignKey(
+        to='TraceStatus',
+        on_delete=models.CASCADE,
+        related_name='trace',
+        blank=True, null=True,
+    )
+
     content = models.TextField(verbose_name='内容')
 
     project = models.ForeignKey(
@@ -317,8 +339,12 @@ class ProjectTrace(BaseModel):
     )
 
     @property
+    def tracestatusInfo(self):
+        return self.trace_status.info if self.trace_status else {}
+
+    @property
     def userInfo(self):
-        return self.user.info
+        return self.user.info if self.user else {}
 
     class Meta:
         verbose_name = '项目跟踪情况'
@@ -368,6 +394,7 @@ class ProjectStatusTime(models.Model):
         verbose_name = '项目状态时间轴'
         verbose_name_plural = verbose_name
 
+
 ##########
 # 标签模型
 ##########
@@ -394,6 +421,26 @@ class MonitorType(models.Model):
 
     class Meta:
         verbose_name = '监测类型'
+        verbose_name_plural = verbose_name
+
+
+class ProjectPriority(models.Model):
+
+    title = models.CharField(max_length=64, unique=True, verbose_name='优先级名称')
+
+    @property
+    def info(self):
+        var = {
+            'id': self.id,
+            'title': self.title,
+        }
+        return var
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = '优先级'
         verbose_name_plural = verbose_name
 
 
@@ -510,4 +557,25 @@ class MonitorNumber(models.Model):
     class Meta:
         verbose_name = '监测类型数量'
         verbose_name_plural = verbose_name
+
+
+class TraceStatus(models.Model):
+
+    title = models.CharField(max_length=64, verbose_name='项目跟进状态')
+
+    @property
+    def info(self):
+        var = {
+            'id': self.id,
+            'title': self.title,
+        }
+        return var
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = '监测类型数量'
+        verbose_name_plural = verbose_name
+
 

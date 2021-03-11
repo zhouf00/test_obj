@@ -107,7 +107,7 @@ class UserInfoViewSet(ModelViewSet):
 
     pagination_class = MyPageNumberPagination
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    search_fields =['username', 'name']
+    search_fields =['username', 'name', 'department__name']
 
 
 class CreateUserViewSet(ModelViewSet):
@@ -131,7 +131,7 @@ class UpdateUserStatusViewSet(GenericViewSet, mixins.UpdateModelMixin):
 
 class UserListViewSet(ModelViewSet):
 
-    queryset = models.User.objects.exclude(id=1)
+    queryset = models.User.objects.exclude(id=1).filter(is_active=1)
     serializer_class = serializers.UserListModelSerializer
 
 

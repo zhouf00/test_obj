@@ -57,15 +57,16 @@ class CreateProjectModelSerializer(serializers.ModelSerializer):
 # 项目的序列化
 class ProjectModelSerializer(serializers.ModelSerializer):
 
+
     class Meta:
         model = models.Project
         fields = [
-            'id', 'is_delete', 'name', 'address', 'sn', 'update_time', 'entrance_time', 'finish_time', 'begin_time',
-            'facility_count', 'manager', 'memo', 'pj_sn', 'stock_finish', 'product', 'manufacturers',
+            'id', 'is_delete', 'name', 'address', 'sn', 'update_time', 'entrance_time', 'finish_time', 'begin_time', 'check_time',
+            'facility_count', 'manager', 'memo', 'pj_sn', 'stock_finish', 'product', 'manufacturers','priority',
             'type', 'province', 'monitor_type', 'area', 'working_env', 'diagnosisman', 'salesman', 'builders',
             # 自定义信息
             'monitortypeList', 'typeInfo', 'statusInfo', 'areaInfo', 'working_envInfo', 'manufacturersList',
-            'monitorNumberList', 'diagnosismanList', 'buildersList'
+            'monitorNumberList', 'diagnosismanList', 'buildersList', 'priorityInfo', 'trace_statusInfo'
         ]
 
         extra_kwargs = {
@@ -153,7 +154,7 @@ class ProjectTraceModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ProjectTrace
-        fields = ['create_time', 'content', 'user', 'project', 'userInfo']
+        fields = ['create_time', 'content', 'user','trace_status', 'project', 'userInfo', 'tracestatusInfo']
 
 
 # 项目修改更新时间
@@ -167,6 +168,11 @@ class ProjectUpdateTime(serializers.ModelSerializer):
 ######
 # 标签组
 #####
+class ProjectPrioritySerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProjectPriority
+        fields = ['id', 'title']
+
 class MonitorTypeModelSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -212,3 +218,8 @@ class MonitorNumberModelSerializer(serializers.ModelSerializer):
         fields = ['id', 'project', 'title', 'number']
 
 
+class TraceStatusSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.TraceStatus
+        fields = ['id', 'title']
