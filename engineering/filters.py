@@ -31,6 +31,9 @@ class ProjectFilterSet(FilterSet):
     salesman = filters.CharFilter(field_name='salesman__name', lookup_expr='icontains')
     diagnosisman = filters.CharFilter(field_name='diagnosisman__name', lookup_expr='icontains')
     begin_time = filters.CharFilter(method='filter_begin_time')
+    priority_list = filters.CharFilter(method='filter_priority_list')
+    type_list = filters.CharFilter(method='filter_type_list')
+    product_list = filters.CharFilter(method='filter_product_list')
 
     def filter_begin_time(self, queryset, name, value):
         begin_time = time.strftime("%Y", time.localtime(int(value)/1000))
@@ -44,9 +47,21 @@ class ProjectFilterSet(FilterSet):
         value_list = value.split(',')
         return queryset.filter(status__id__in=value_list)
 
+    def filter_priority_list(self, queryset, name, value):
+        value_list = value.split(',')
+        return queryset.filter(priority__id__in=value_list)
+
+    def filter_type_list(self, queryset, name, value):
+        value_list = value.split(',')
+        return queryset.filter(type__id__in=value_list)
+
+    def filter_product_list(self, queryset, name, value):
+        value_list = value.split(',')
+        return queryset.filter(production__product__in=value_list)
+
     class Meta:
         model = models.Project
-        fields = ['id', 'name', 'area', 'sn', 'status', 'manufacturers', 'stock_finish', 'priority']
+        fields = ['id', 'name', 'area', 'sn', 'status', 'manufacturers', 'stock_finish', 'priority' ]
 
 
 class OutsourcerFilterSet(FilterSet):

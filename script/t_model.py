@@ -14,6 +14,7 @@ from APPS.crm import models as crm_models
 ##############
 # 项目管理查询
 ##############
+Project.objects.filter(production__product__in=)
 # project = Project.objects.filter(area=1).order_by('-update_time')
 # print(Project.objects.filter(begin_time__year='2021'))
 # print(Project.objects.filter(status_))

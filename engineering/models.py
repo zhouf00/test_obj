@@ -96,7 +96,8 @@ class Project(BaseModel):
 
     @property
     def monitorNumberList(self):
-        return self.number.values('title','number')
+        res = {var['title']:var['number'] for var in self.number.values('title','number')}
+        return res
 
     @property
     def manufacturersList(self):

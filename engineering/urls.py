@@ -8,6 +8,7 @@ urlpatterns = [
     url(r'^project/$', views.ProjectViewSet.as_view({'get': 'list'})),
     url(r'^project/create/$', views.ProjectViewSet.as_view({'post': 'create'})),
     url(r'^project/update/(?P<pk>.*)/$', views.ProjectViewSet.as_view({'post': 'update'})),
+    url(r'^project/delete/(?P<pk>.*)/$', views.ProjectDeleteViewSet.as_view({'post': 'update'})),
     url(r'^project/classify/$', views.ProjectClassifyViewSet.as_view({'get': 'list'})),
 
     url(r'^project/overview/$', views.ProjectOverview.as_view()),

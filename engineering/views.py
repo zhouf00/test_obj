@@ -1,4 +1,4 @@
-import time
+import time,datetime
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.filters import SearchFilter
@@ -43,6 +43,23 @@ class ProjectViewSet(ModelViewSet):
                 # self.isleader = False
                 self.queryset = self.queryset.filter(manager=self.request.user.name).distinct()
         return self.queryset
+
+    # def list(self, request, *args, **kwargs):
+    #     print(datetime.datetime.today())
+    #     queryset = self.filter_queryset(self.get_queryset())
+    #
+    #     page = self.paginate_queryset(queryset)
+    #     if page is not None:
+    #         serializer = self.get_serializer(page, many=True)
+    #         return self.get_paginated_response(serializer.data)
+    #
+    #     serializer = self.get_serializer(queryset, many=True)
+    #     return APIResponse()
+
+
+class ProjectDeleteViewSet(ModelViewSet):
+    queryset = models.Project.objects.filter(is_delete=False).order_by('-amount')
+    serializer_class = serializers.ProjectDeleteModelSerializer
 
 
 class ProjectClassifyViewSet(GenericViewSet):

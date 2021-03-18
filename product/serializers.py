@@ -25,9 +25,10 @@ class ProductionModelSerializer(serializers.ModelSerializer):
                   'productInfo', 'lifecycleInfo']
 
     def validate(self, attrs):
-        sn = attrs['sn']
-        if len(models.Production.objects.filter(sn=sn)) > 0:
-            raise serializers.ValidationError({'msg': '此sn已经存在'})
+        if 'sn' in attrs and attrs['sn']:
+            sn = attrs['sn']
+            if len(models.Production.objects.filter(sn=sn)) > 0:
+                raise serializers.ValidationError({'msg': '此sn已经存在'})
         return attrs
 
 

@@ -8,7 +8,7 @@ class MyPageNumberPagination(PageNumberPagination):
 
     # ?page=页码
     page_query_param = 'page'
-    page_size = 3
+    page_size = 50
     page_size_query_param = 'pageSize'
     max_page_size = 500
 

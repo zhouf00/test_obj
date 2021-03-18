@@ -29,7 +29,7 @@ class Product(BaseModel):
 
     @property
     def aisleInfo(self):
-        return self.aisle.info
+        return self.aisle.info if self.aisle else {}
 
     @property
     def statusInfo(self):
@@ -78,7 +78,7 @@ class Production(BaseModel):
 
     @property
     def productInfo(self):
-        return self.product.info
+        return self.product.info if self.product else {}
 
     @property
     def lifecycleInfo(self):

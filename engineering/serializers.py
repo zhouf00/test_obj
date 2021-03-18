@@ -87,6 +87,12 @@ class ProjectModelSerializer(serializers.ModelSerializer):
             }
         }
 
+# 项目删除的序列化
+class ProjectDeleteModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Project
+        fields = ['id', 'is_delete']
+
 
 # 项目时间轴
 class ProjectStatusTimeSerializer(serializers.ModelSerializer):
