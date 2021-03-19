@@ -125,9 +125,9 @@ class ProjectOverview(APIView):
         # print(users)
         user_list = users
         for var in queryset:
-            # print(var)
-            if 'id' in project_dict and var['id'] in project_dict :
-                project_dict[var['id']]['builders'] += '%s'%var['builders__name']
+            print(var['id'] in project_dict.keys())
+            if var['id'] in project_dict.keys() :
+                project_dict[var['id']]['builders'] += ',%s'%var['builders__name']
             else:
                 project_dict[var['id']] = {
                     'id': var['id'],
@@ -153,6 +153,7 @@ class ProjectOverview(APIView):
             'project': project_dict.values(),
             'user': user_list
         }
+        print(project_dict[221])
         return APIResponse(results=res)
 
 

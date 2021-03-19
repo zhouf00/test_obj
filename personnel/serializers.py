@@ -1,6 +1,6 @@
 # _*_ coding: utf-8 _*_
 import datetime
-from rest_framework import serializers
+from rest_framework import serializers, exceptions
 from rest_framework_jwt.settings import api_settings
 
 from personnel import models
@@ -116,7 +116,48 @@ class UserModelSerializer(serializers.ModelSerializer):
                   ]
 
 
-class CreateUserModelSerializer(serializers.ModelSerializer):
+class  CreateUserModelSerializer(serializers.ModelSerializer):
+
+    pwd = serializers.CharField(
+        required=False,
+        min_length=6,
+        error_messages={
+            'min_length': '密码最少6位'
+        })
+    re_pwd = serializers.CharField(
+        required=False,
+        min_length=6,
+        error_messages={
+            'min_length': '密码最少6位'
+        })
+
+    class Meta:
+        model = models.User
+        fields = ['username', 'mobile', 'name', 'password', 'pwd', 're_pwd', 'is_active']
+        extra_kwargs ={
+            'password': {
+                'required': False
+            },
+            'pwd': {
+                'required': False
+            },
+            're_pwd': {
+                'required': False
+            },
+        }
+
+    def validate(self, attrs):
+        if 'pwd' in attrs:
+            pwd = attrs.pop('pwd')
+            re_pwd = attrs.pop('re_pwd') if 're_pwd' in attrs else ''   # 取出校验
+            if not pwd:
+                raise exceptions.ValidationError({'pwd': '密码不能为空'})
+            if pwd != re_pwd:
+                raise exceptions.ValidationError({'pwd': '两次密码不一致'})
+            else:
+                attrs['password'] = pwd
+        return attrs
+
 
     def create(self, validated_data):
         user = super().create(validated_data)
@@ -131,16 +172,6 @@ class CreateUserModelSerializer(serializers.ModelSerializer):
             user.set_password(validated_data['password'])
             user.save()
         return user
-
-    class Meta:
-        model = models.User
-        fields = ['username', 'mobile', 'name', 'password', 'is_active']
-        extra_kwargs ={
-            'password': {
-                'required': False
-            }
-        }
-
 
 class UpdateStatusModelSerializer(serializers.ModelSerializer):
 
@@ -206,7 +237,7 @@ class DeptUserUpdateModelSerializer(serializers.ModelSerializer):
 
     def validate(self, attrs):
 
-        print('修改', self.instance, attrs)
+        # print('修改', self.instance, attrs)
         return attrs
 
 

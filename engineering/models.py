@@ -8,8 +8,9 @@ class Project(BaseModel):
 
     name = models.CharField(max_length=64, unique=True, verbose_name='项目名称')
     address = models.CharField(max_length=64, verbose_name='项目地址')
-    pj_sn = models.CharField(max_length=64, blank=True, null=True, verbose_name='项目编号')
-    sn = models.CharField(max_length=64, blank=True, null=True, verbose_name='内部编号')
+    pj_sn = models.CharField(max_length=64, blank=True, null=True, verbose_name='合同编号')
+    serial = models.CharField(max_length=64, blank=True, null=True, verbose_name='项目流水号')
+    sn = models.CharField(max_length=64, blank=True, null=True, verbose_name='项目编号')
     facility_count = models.IntegerField(default=0, verbose_name='设备数量')
     contractor = models.CharField(max_length=64, blank=True, null=True, verbose_name='承包商')
     manager = models.CharField(max_length=64, blank=True, null=True, verbose_name='项目负责人')

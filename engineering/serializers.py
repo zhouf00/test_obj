@@ -62,7 +62,7 @@ class ProjectModelSerializer(serializers.ModelSerializer):
         model = models.Project
         fields = [
             'id', 'is_delete', 'name', 'address', 'sn', 'update_time', 'entrance_time', 'finish_time', 'begin_time', 'check_time',
-            'facility_count', 'manager', 'memo', 'pj_sn', 'stock_finish', 'product', 'manufacturers','priority',
+            'facility_count', 'manager', 'memo', 'pj_sn', 'stock_finish', 'product', 'manufacturers','priority','serial',
             'type', 'province', 'monitor_type', 'area', 'working_env', 'diagnosisman', 'salesman', 'builders',
             # 自定义信息
             'monitortypeList', 'typeInfo', 'statusInfo', 'areaInfo', 'working_envInfo', 'manufacturersList',
