@@ -21,6 +21,7 @@ class ProjectFilterSet(FilterSet):
 
     name = filters.CharFilter(field_name='name',lookup_expr='icontains')
     sn = filters.CharFilter(field_name='sn', lookup_expr='icontains')
+    serial = filters.CharFilter(field_name='serial', lookup_expr='icontains')
     # manufacturers = filters.CharFilter(field_name='manufacturers__id')
     stock_finish = filters.CharFilter(field_name='stock_finish')
     status_list = filters.CharFilter(method='filter_status_list')
@@ -34,6 +35,7 @@ class ProjectFilterSet(FilterSet):
     priority_list = filters.CharFilter(method='filter_priority_list')
     type_list = filters.CharFilter(method='filter_type_list')
     product_list = filters.CharFilter(method='filter_product_list')
+    province_list = filters.CharFilter(method='filter_province_list')
 
     def filter_begin_time(self, queryset, name, value):
         begin_time = time.strftime("%Y", time.localtime(int(value)/1000))
@@ -59,18 +61,33 @@ class ProjectFilterSet(FilterSet):
         value_list = value.split(',')
         return queryset.filter(production__product__in=value_list)
 
+    def filter_province_list(self, queryset, name, value):
+        value_list = value.split(',')
+        return queryset.filter(province__in=value_list)
+
     class Meta:
         model = models.Project
-        fields = ['id', 'name', 'area', 'sn', 'status', 'manufacturers', 'stock_finish', 'priority' ]
+        fields = ['id', 'name', 'area', 'serial', 'sn', 'status', 'manufacturers', 'stock_finish', 'priority']
+
+
+class FacilityFilterSet(FilterSet):
+    class Meta:
+        model = models.Facility
+        fields = ['project']
 
 
 class OutsourcerFilterSet(FilterSet):
 
     title = filters.CharFilter(field_name='title',lookup_expr='icontains')
+    project = filters.CharFilter(method='filter_project')
+
+    def filter_project(self, queryset, name, value):
+        print(queryset.filter(contract__project=value))
+        return queryset.filter(contract__project=value)
 
     class Meta:
         model = models.Outsourcer
-        fields = ['title']
+        fields = ['title', 'project']
 
 
 class IdcRoomFilterSet(FilterSet):
@@ -104,10 +121,14 @@ class InvoiceFilterSet(FilterSet):
 class ProjectTraceFilterSet(FilterSet):
 
     project = filters.CharFilter(field_name='project__id')
+    tasks = filters.CharFilter(method='filter_tasks')
+
+    def filter_tasks(self, queryset, name, value):
+        return queryset.filter(task=value)
 
     class Meta:
         model = models.ProjectTrace
-        fields = ['project']
+        fields = []
 
 
 class ContractFilterSet(FilterSet):

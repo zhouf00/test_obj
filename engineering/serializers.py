@@ -63,7 +63,7 @@ class ProjectModelSerializer(serializers.ModelSerializer):
         fields = [
             'id', 'is_delete', 'name', 'address', 'sn', 'update_time', 'entrance_time', 'finish_time', 'begin_time', 'check_time',
             'facility_count', 'manager', 'memo', 'pj_sn', 'stock_finish', 'product', 'manufacturers','priority','serial',
-            'type', 'province', 'monitor_type', 'area', 'working_env', 'diagnosisman', 'salesman', 'builders',
+            'type', 'province', 'monitor_type', 'area', 'working_env', 'diagnosisman', 'salesman', 'builders', 'collect',
             # 自定义信息
             'monitortypeList', 'typeInfo', 'statusInfo', 'areaInfo', 'working_envInfo', 'manufacturersList',
             'monitorNumberList', 'diagnosismanList', 'buildersList', 'priorityInfo', 'trace_statusInfo'
@@ -87,11 +87,24 @@ class ProjectModelSerializer(serializers.ModelSerializer):
             }
         }
 
+
+class ProjectListModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Project
+        fields = ['id', 'name', 'status','builders']
+
+
 # 项目删除的序列化
 class ProjectDeleteModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Project
         fields = ['id', 'is_delete']
+
+
+class FacilityModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.Facility
+        fields = '__all__'
 
 
 # 项目时间轴
@@ -160,7 +173,9 @@ class ProjectTraceModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ProjectTrace
-        fields = ['create_time', 'content', 'user','trace_status', 'project', 'userInfo', 'tracestatusInfo']
+        fields = '__all__'
+        # fields = ['id', 'is_delete', 'create_time', 'update_time', 'status','outsourcer', 'project', 'user', 'worklog',
+        #           'task', 'subscriber']
 
 
 # 项目修改更新时间
@@ -169,6 +184,12 @@ class ProjectUpdateTime(serializers.ModelSerializer):
     class Meta:
         model = models.Project
         fields = ['id', 'priority', 'stock_finish']
+
+
+class ProjectCollect(serializers.ModelSerializer):
+    class Meta:
+        model = models.Project
+        fields = ['id', 'collect']
 
 
 ######

@@ -1,7 +1,6 @@
 from rest_framework import serializers
 
 from . import models
-from personnel.models import User
 
 class MarketModelSerializer(serializers.ModelSerializer):
 

@@ -25,4 +25,7 @@ urlpatterns = [
     url(r'^lifecycle/$', views.LifecycleViewSet.as_view({'get': 'list'})),
     url(r'^lifecycle/create/$', views.LifecycleViewSet.as_view({'post': 'create'})),
     url(r'^lifecycle/update/(?P<pk>.*)/$', views.LifecycleViewSet.as_view({'post': 'update'})),
+
+    url(r'^production_status/$', views.ProductionStatusViewSet.as_view({'get': 'list','post': 'create'})),
+    url(r'^production_status/update/(?P<pk>.*)/$', views.ProductionStatusViewSet.as_view({'post': 'update'})),
 ]

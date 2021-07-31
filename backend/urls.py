@@ -5,4 +5,5 @@ from . import views
 
 urlpatterns = [
     url(r'^jsapi/$', views.JsApiAPIView.as_view()),
+    url(r'^push_message/$', views.PushMessageAPIView.as_view()),
 ]

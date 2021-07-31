@@ -12,7 +12,7 @@ class User(AbstractUser):
     mobile = models.CharField(max_length=11, blank=True, null=True, verbose_name='手机')
     name = models.CharField(blank=True, null=True, max_length=32, verbose_name='中文名')
     gender = models.SmallIntegerField(default=1, verbose_name='性别')
-    avatar = models.URLField(default='https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2866953378,474015488&fm=11&gp=0.jpg',
+    avatar = models.URLField(default='https://ss0.baidu.com/94o3dSag_xI4khGko9WTAnF6hhy/zhidao/wh%3D450%2C600/sign=a300d7f4d958ccbf1be9bd3e2ce89008/c75c10385343fbf2a2cfd865b87eca8064388f90.jpg',
                              verbose_name='头像链接')
     main_department = models.IntegerField(default=0, verbose_name='主部门')
     position = models.CharField(max_length=32, blank=True, null=True, verbose_name='岗位名称')
@@ -79,12 +79,14 @@ class User(AbstractUser):
         # d = self.department.filter(deptid__in=self.deptList)
         d = Structure.objects.filter(deptid__in=self.deptList)
         for var in d:
-            d_list += list(var.depttouser_set.values('user_id', 'user__name'))
-        users = [var['user_id'] for var in d_list]
+            d_list += list(var.depttouser_set.values('user', 'user__name', 'user__id'))
+        # print(d_list)
+        users = [var['user'] for var in d_list]
         users_name = [var['user__name'] for var in d_list]
+        users_id = [var['user__id'] for var in d_list]
         # print('部门成员的ID:', users, users_name)
         # 0 返回username ; 0 返回name
-        return users,users_name
+        return users,users_name, users_id
 
     @property
     def markethistoryInfo(self):

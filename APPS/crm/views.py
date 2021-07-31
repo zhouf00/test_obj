@@ -227,6 +227,7 @@ class MarketHistoryViewSet(ModelViewSet):
                 'performance': performance,
                 'markethistoryInfo': self.add_date(user_queryset)
             })
+        print(res_list)
         return APIResponse(
             results=res_list
         )
@@ -280,7 +281,7 @@ class AnnalsViewSet(APIView):
         rate_dict = {'rate_0': 0, 'rate_025': 0.25, 'rate_050': 0.5, 'rate_075': 0.75, 'rate_100': 1}
         # dict1 = {'amount':0, 'estimated_amount': 0}
         queryset_month = queryset.filter(date__year=date.strftime('%Y'), date__month=date.strftime('%m'))
-        print(queryset_month[0].date.strftime('%Y%m%d'))
+        # print(queryset_month[0].date.strftime('%Y%m%d'))
         if reload or not queryset_month.values() or queryset_month[0].date.strftime('%Y%m%d') != date.strftime('%Y%m%d'):
             # print('更新')
             markets_obj = models.Market.objects.filter(traceTime__year=date.strftime('%Y'),

@@ -1,6 +1,7 @@
-包
+安装包
 ```os
 rest_framework
+psycopg2
 
 ```
 

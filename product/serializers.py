@@ -32,6 +32,12 @@ class ProductionModelSerializer(serializers.ModelSerializer):
         return attrs
 
 
+class ProductionLogModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProductionLog
+        fields = '__all__'
+
+
 #########
 # 标签
 ########
@@ -53,4 +59,11 @@ class LifecycleModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Lifecycle
+        fields = '__all__'
+
+
+class ProductionStatusModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.ProductionStatus
         fields = '__all__'

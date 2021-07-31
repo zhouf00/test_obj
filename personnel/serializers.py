@@ -112,11 +112,11 @@ class UserModelSerializer(serializers.ModelSerializer):
         model = models.User
         fields = ['id', 'username', 'mobile', 'name', 'last_login', 'gender', 'avatar',
                   'is_active', 'email', 'position', 'auth',
-                  'menus','markethistoryInfo'
+                  'menus','markethistoryInfo', 'project'
                   ]
 
 
-class  CreateUserModelSerializer(serializers.ModelSerializer):
+class CreateUserModelSerializer(serializers.ModelSerializer):
 
     pwd = serializers.CharField(
         required=False,
@@ -173,6 +173,7 @@ class  CreateUserModelSerializer(serializers.ModelSerializer):
             user.save()
         return user
 
+
 class UpdateStatusModelSerializer(serializers.ModelSerializer):
 
     class Meta:
@@ -202,11 +203,17 @@ class UpdateDeptModelSerializer(serializers.Serializer):
         return instance
 
 
+class UpdateUserProjectModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.User
+        fields = ['id', 'project']
+
+
 class UserListModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.User
-        fields = ['id','username', 'name', 'project', 'department', 'position']
+        fields = ['id','username', 'name', 'project', 'department', 'position', 'avatar']
 
 
 class DeptModelSerializer(serializers.ModelSerializer):

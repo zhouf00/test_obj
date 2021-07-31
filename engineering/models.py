@@ -28,6 +28,13 @@ class Project(BaseModel):
     entrance_time = models.DateTimeField(blank=True, null=True, verbose_name='预计入场时间')
     finish_time = models.DateTimeField(blank=True, null=True, verbose_name='预计完成时间')
 
+    collect = models.ManyToManyField(
+        to='personnel.User',
+        db_constraint=False,
+        related_name='collect',
+        blank=True,
+    )
+
     salesman = models.ManyToManyField(
         to='personnel.User',
         db_constraint=False,
@@ -137,11 +144,29 @@ class Project(BaseModel):
         res = self.trace.order_by('-create_time').values('trace_status__title', 'content')
         return {'title': res[0]['trace_status__title'], 'content': res[0]['content']} if res else {}
 
+
     def __str__(self):
         return '%s' % (self.name)
 
     class Meta:
         verbose_name = '项目'
+        verbose_name_plural = verbose_name
+
+
+# 监测设备
+class Facility(BaseModel):
+    title = models.CharField(max_length=64, verbose_name='设备名称')
+    # sn = models.SmallIntegerField(blank=True, null=True, verbose_name='设备编号')
+    memo = models.TextField(blank=True, null=True, verbose_name='备注')
+
+    project = models.SmallIntegerField(blank=True, null=True,
+                                       verbose_name='关联-(project) 项目')
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = '监测设备'
         verbose_name_plural = verbose_name
 
 
@@ -210,7 +235,6 @@ class Contract(BaseModel):
     delivery_time = models.DateTimeField(blank=True, null=True, verbose_name='加入时间')
 
     def nameInfo(self):
-        print(self.name.info())
         return self.name.info()
 
     class Meta:
@@ -329,6 +353,13 @@ class ProjectTrace(BaseModel):
         blank=True, null=True,
     )
 
+    progress = models.SmallIntegerField(blank=True, null=True,
+                                         verbose_name='进度百分比')
+
+    issue_status = models.CharField(blank=True, null=True,
+        max_length=64, verbose_name='问题状态')
+    status = models.SmallIntegerField(blank=True, null=True,
+        verbose_name='关联-(ProjectStatusTime) 日报')
     content = models.TextField(verbose_name='内容')
 
     project = models.ForeignKey(
@@ -339,6 +370,22 @@ class ProjectTrace(BaseModel):
         to='personnel.User', on_delete=models.CASCADE, related_name='trace',
         blank=True, null=True,
     )
+    outsourcer = models.SmallIntegerField(blank=True, null=True,
+        verbose_name='关联-(Outsourcer) 日报')
+
+    worklog = models.SmallIntegerField(blank=True, null=True,
+        verbose_name='关联-(WorkLog) 日报')
+
+    task = models.SmallIntegerField(blank=True, null=True,
+        verbose_name='关联-(Task) 日报')
+
+    subscriber = models.ManyToManyField(
+        to='personnel.User',
+        db_constraint=False,
+        related_name='ProjectTrace_sub',
+        blank=True,
+        verbose_name='参与者'
+    )
 
     @property
     def tracestatusInfo(self):
@@ -348,20 +395,13 @@ class ProjectTrace(BaseModel):
     def userInfo(self):
         return self.user.info if self.user else {}
 
+    @property
+    def subscriberList(self):
+        # print(self.subscriber.values('id', 'name', 'avatar'))
+        return self.subscriber.values('id', 'name', 'avatar')
+
     class Meta:
         verbose_name = '项目跟踪情况'
-        verbose_name_plural = verbose_name
-
-
-class EventLog(BaseModel):
-
-    project = models.ForeignKey(to='Project', on_delete=models.CASCADE, related_name='log')
-    event_type = models.SmallIntegerField(default=1, verbose_name='事件类型')
-    detail = models.TextField(verbose_name='事件详情')
-    memo = models.TextField(blank=True, null=True, verbose_name='备注')
-
-    class Meta:
-        verbose_name = '日志'
         verbose_name_plural = verbose_name
 
 

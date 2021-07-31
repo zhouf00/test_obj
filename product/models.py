@@ -61,9 +61,11 @@ class Production(BaseModel):
         'engineering.Project',
         on_delete=models.CASCADE,
         related_name='production',
-        blank=True, null=True,
-    )
-    product = models.ForeignKey('Product', on_delete=models.CASCADE, related_name='production')
+        blank=True, null=True,)
+    product = models.ForeignKey(
+        'Product',
+        on_delete=models.CASCADE,
+        related_name='production')
     sn = models.CharField(max_length=32, blank=True, null=True, verbose_name='产品编号')
     facility = models.CharField(max_length=64, blank=True, null=True, verbose_name='绑定设备')
     sw = models.CharField(max_length=32, blank=True, null=True, verbose_name='嵌入式版本')
@@ -92,6 +94,38 @@ class Production(BaseModel):
         verbose_name_plural = verbose_name
 
 
+# 产品日志
+class ProductionLog(BaseModel):
+
+    issue_status = models.CharField(blank=True, null=True,
+        max_length=64, verbose_name='问题状态')
+    title = models.CharField(blank=True, null=True,
+        max_length=64, verbose_name='操作信息')    # 生产、维修、安装、返修、发货
+    content = models.TextField(blank=True, null=True,
+        verbose_name='正文')
+    user = models.SmallIntegerField(blank=True, null=True,
+        verbose_name='关联-(User) 提交人')
+    production = models.SmallIntegerField(blank=True, null=True,
+        verbose_name='关联-(Production) 设备')
+    project = models.SmallIntegerField(blank=True, null=True,
+        verbose_name='关联-(Project) 设备')
+    # production = models.ForeignKey(
+    #     'Production', on_delete=models.CASCADE, related_name='productionlog',
+    #     blank=True, null=True,
+    #     verbose_name='关联-(Production) 产品')
+    facility = models.SmallIntegerField(blank=True, null=True,
+        verbose_name='关联-(Facility) 设备')
+    worklog = models.SmallIntegerField(blank=True, null=True,
+                                       verbose_name='日志汇报')
+    subscriber = models.ManyToManyField(
+        to='personnel.User',
+        db_constraint=False,
+        related_name='ProductionLog_sub',
+        blank=True,
+        verbose_name='参与者'
+    )
+
+
 #########
 # 标签
 ########
@@ -107,6 +141,21 @@ class ProductStatus(models.Model):
 
     class Meta:
         verbose_name = '产品使用状态'
+        verbose_name_plural = verbose_name
+
+
+class ProductionStatus(models.Model):
+    title = models.CharField(max_length=32, verbose_name='出产产品状态')
+
+    @property
+    def info(self):
+        return {
+            'id': self.id,
+            'title':self.title
+        }
+
+    class Meta:
+        verbose_name = '出产产品状态'
         verbose_name_plural = verbose_name
 
 

@@ -10,8 +10,15 @@ urlpatterns = [
     url(r'^project/update/(?P<pk>.*)/$', views.ProjectViewSet.as_view({'post': 'update'})),
     url(r'^project/delete/(?P<pk>.*)/$', views.ProjectDeleteViewSet.as_view({'post': 'update'})),
     url(r'^project/classify/$', views.ProjectClassifyViewSet.as_view({'get': 'list'})),
+    url(r'^project/list/$', views.ProjectListViewSet.as_view({'get': 'list'})),
 
     url(r'^project/overview/$', views.ProjectOverview.as_view()),
+    # 收藏
+    url(r'^project/collect/$', views.ProjectColletViewSet.as_view()),
+
+    # 监测设备信息
+    url(r'^facility/$', views.FacilityViewSet.as_view({'get': 'list', 'post': 'create'})),
+    url(r'^facility/update/(?P<pk>.*)/$', views.FacilityViewSet.as_view({'post': 'update'})),
 
     # 时间轴
     url(r'^projectstatustime/$', views.ProjectStatusTimeViewSet.as_view({'get': 'list', 'post': 'my_post'})),
@@ -38,6 +45,9 @@ urlpatterns = [
     url(r'^invoice/$', views.InvoiceViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^invoice/update/$', views.InvoiceViewSet.as_view({'post': 'update'})),
     url(r'^invoice/update_time/(?P<pk>.*)/$', views.InvoiceUpdateViewSet.as_view({'post': 'update'})),
+    # 图片上传
+    url(r'^invoice/img/$', views.InvoiceImageViewSet.as_view({'get': 'list'})),
+    url(r'^invoice/upload/$', views.InvoiceImageViewSet.as_view({'post': 'create'})),
 
     # 标签
     url(r'^projectTag/manufacturer/$', views.ProjectManufacturerViewSet.as_view({'get': 'list', 'post': 'create'})),
@@ -70,7 +80,5 @@ urlpatterns = [
     url(r'^projectTag/tracestatus/$', views.TraceStatusViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^projectTag/tracestatus/update/(?P<pk>.*)/$', views.TraceStatusViewSet.as_view({'post': 'update'})),
 
-    # 图片上传
-    url(r'^invoice/img/$', views.InvoiceImageViewSet.as_view({'get': 'list'})),
-    url(r'^invoice/upload/$', views.InvoiceImageViewSet.as_view({'post': 'create'})),
+
 ]

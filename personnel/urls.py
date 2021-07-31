@@ -15,6 +15,8 @@ urlpatterns = [
     url(r'^register/$', views.CreateUserViewSet.as_view({'post': 'create'})),
     url(r'^updateuser/(?P<pk>.*)/$', views.CreateUserViewSet.as_view({'post': 'update'})),
     url(r'^updateuserstatus/(?P<pk>.*)/$', views.UpdateUserStatusViewSet.as_view({'post': 'my_update'})),
+    url(r'^updateuserproject/(?P<pk>.*)/$', views.UpdateUserProjectViewSet.as_view({'post': 'update'})),
+    url(r'userleaders/$', views.UserLeaderViewSet.as_view()),
 
     url(r'^structure/$', views.DeptViewSet.as_view({'get': 'list'})),
     url(r'^structure/create/$', views.DeptViewSet.as_view({'post': 'create'})),

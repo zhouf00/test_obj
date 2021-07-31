@@ -1,15 +1,17 @@
 # Django脚本化启动
 import os, django
 import time,datetime
+from itertools import chain
 from django.db.models import Count, Sum, Q
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'test_obj.settings')
 django.setup()
 
-from engineering.models import Project, Manufacturer, ProjectStatusTime, ProjectStatus
+from engineering.models import Project, Manufacturer, ProjectStatusTime, ProjectStatus,ProjectTrace,Outsourcer
 from personnel import models as personnel_models
 from rbac.models import Menu, Auth
 from product import models as product_models
 from APPS.crm import models as crm_models
+from mlr import models as mlr_models
 
 ##############
 # 项目管理查询
@@ -20,18 +22,18 @@ from APPS.crm import models as crm_models
 # print(Project.objects.filter(status_))
 # print(ProjectStatusTime.objects.filter(status_id=1))
 # print(time.strftime("%Y", time.localtime(int('1577808000000')/1000)))
-p = list(Project.objects.values('id', 'sn', 'serial', 'begin_time', 'type__title'))
-print(p)
-type = {
-    '水泥': '06',
-    '电力石化': '02',
-    '轨交': '03',
-    '煤炭': '05',
-    '油气': '07',
-    '风电-陆上': '01',
-    '风电-海上': '01',
-    '风电': '01',
-}
+# p = list(Project.objects.values('id', 'sn', 'serial', 'begin_time', 'type__title'))
+# print(p)
+# type = {
+#     '水泥': '06',
+#     '电力石化': '02',
+#     '轨交': '03',
+#     '煤炭': '05',
+#     '油气': '07',
+#     '风电-陆上': '01',
+#     '风电-海上': '01',
+#     '风电': '01',
+# }
 # for var in p:
 #     if var['begin_time']:
 #         p_time = var['begin_time'].strftime('%y%m')
@@ -56,6 +58,15 @@ type = {
 #     var['count'] = p.filter(status__title=var['title']).count()
 #     print(var)
 # tag_list.append({'title':'全部'})
+date = datetime.datetime.now()
+# print(ProjectTrace.objects.filter(project=5).values('subscriber'))
+# print(Outsourcer.objects.filter(contract__project=4))
+print(ProjectTrace.objects.filter(
+            create_time__year=date.strftime('%Y'),
+            create_time__month=date.strftime('%m'),
+            create_time__day=date.strftime('%d'),
+            worklog__isnull=False
+    ))
 
 ##############
 # 销售管理查询
@@ -103,3 +114,17 @@ type = {
 #     print(var)
 
 # print(personnel_models.User.objects.filter(is_active=1))
+
+##############
+# 日报功能
+##############
+date = datetime.datetime.now()
+# print(date.strftime('%Y%m%d'))
+a = mlr_models.WorkLogs.objects.values()
+# print(len(a))
+# print(mlr_models.Summary.objects.filter(create_time__year=date.strftime('%Y'), create_time__month=date.strftime('%m'), create_time__day=date.strftime('%d')))
+
+b = mlr_models.WorkStatus.objects.all()
+c = mlr_models.OtherEnv.objects.exclude()
+
+print(mlr_models.Task.objects.filter(subscriber=2).values())

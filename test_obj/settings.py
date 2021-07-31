@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'rbac.apps.RbacConfig',                  # 前台菜单权限
     'product.apps.ProductConfig',            # 产品管理
     'APPS.crm.apps.CrmConfig',               # 销售管理
+    'APPS.mlr.apps.MlrConfig',               # 报告系统
 ]
 
 MIDDLEWARE = [
@@ -91,17 +92,17 @@ WSGI_APPLICATION = 'test_obj.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/2.2/ref/settings/#databases
 
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": "redis://127.0.0.1:6379/1",
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        }
-    }
-}
-SESSION_ENGINE = "django.contrib.sessions.backends.cache"
-SESSION_CACHE_ALIAS = "default"
+# CACHES = {
+#     "default": {
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": "redis://127.0.0.1:6379/1",
+#         "OPTIONS": {
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
+#         }
+#     }
+# }
+# SESSION_ENGINE = "django.contrib.sessions.backends.cache"
+# SESSION_CACHE_ALIAS = "default"
 
 # DATABASES = {
 #     'default': {
@@ -114,12 +115,33 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'windit',
-        'HOST': '10.100.0.105',
+        'HOST': '10.100.0.150',
         'PORT': 33060,
         'USER': 'root',
-        'PASSWORD':'test'
+        'PASSWORD':'test',
+        'OPTIONS': {
+            'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"',
+            'charset': 'utf8mb4'
+        }
+
     }
 }
+
+# 开发环境
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'windit',
+#         'HOST': 'db',
+#         'PORT': 3306,
+#         'USER': 'root',
+#         'PASSWORD':'test',
+#         'OPTIONS': {
+#              'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"',
+#              'charset': 'utf8mb4'
+#          }
+#     }
+# }
 
 
 # Password validation
@@ -166,6 +188,7 @@ MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # 企业微信使用
 WX_TOKEN = ''
+# WX_TOKEN = '_agCLNrykasCQU02WOb7E9FM3LAdVA5_xBMQvUb9YR1vb7KDmnjPr9A-6JB0yoMQ6VR-tVmHllkypK6pfMxLTdZx5tP2lEYRdvfpoWclxGtD6Dr1KKimpS-kGdeHtDwFYmtGVLIuzRWQc0QEYXxFOghPkaiErYzYeLosbVw3FdfScmzVAazLHQ2j7pUlb4CnfOpSbnNFxakWeuuLb2l39w'
 WX_JSAPITICKET = {
     'token': '',
     'ticket': ''

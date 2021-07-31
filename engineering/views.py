@@ -1,4 +1,3 @@
-import time,datetime
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet, GenericViewSet
 from rest_framework.filters import SearchFilter
@@ -10,10 +9,11 @@ from personnel import models as personnel_models
 
 from utils.response import APIResponse
 from utils.pagenations import MyPageNumberPagination
-from utils.my_modelview import ProjectUpdateViewSet
+from utils.my_modelview import MyProjectModelViewSet
 
 
-class ProjectViewSet(ModelViewSet):
+# 项目信息
+class ProjectViewSet(MyProjectModelViewSet):
     """项目列表数据"""
     queryset = models.Project.objects.filter(is_delete=False).order_by('-update_time')
     serializer_class = serializers.ProjectModelSerializer
@@ -32,29 +32,22 @@ class ProjectViewSet(ModelViewSet):
         elif '普通用户'in role and len(role)>1:
             pass
         else:
-            pass
             # 拿到部门领导身份
             if self.request.user.deptList:
                 # print('你是部门领导')
                 # self.isleader = True
-                self.queryset = self.queryset.filter(manager__in=self.request.user.deptmembers[1]).distinct()
+                self.queryset = self.queryset.filter(
+                    Q(manager__in=self.request.user.deptmembers[1])
+                    |Q(builders__in=self.request.user.deptmembers[2])
+                ).distinct()
             else:
                 # print('你不是部门领导')
                 # self.isleader = False
-                self.queryset = self.queryset.filter(manager=self.request.user.name).distinct()
+                self.queryset = self.queryset.filter(
+                    Q(manager=self.request.user.name) |
+                    Q(builders=self.request.user.id)
+                ).distinct()
         return self.queryset
-
-    # def list(self, request, *args, **kwargs):
-    #     print(datetime.datetime.today())
-    #     queryset = self.filter_queryset(self.get_queryset())
-    #
-    #     page = self.paginate_queryset(queryset)
-    #     if page is not None:
-    #         serializer = self.get_serializer(page, many=True)
-    #         return self.get_paginated_response(serializer.data)
-    #
-    #     serializer = self.get_serializer(queryset, many=True)
-    #     return APIResponse()
 
 
 class ProjectDeleteViewSet(ModelViewSet):
@@ -125,7 +118,7 @@ class ProjectOverview(APIView):
         # print(users)
         user_list = users
         for var in queryset:
-            print(var['id'] in project_dict.keys())
+            # print(var['id'] in project_dict.keys())
             if var['id'] in project_dict.keys() :
                 project_dict[var['id']]['builders'] += ',%s'%var['builders__name']
             else:
@@ -153,7 +146,6 @@ class ProjectOverview(APIView):
             'project': project_dict.values(),
             'user': user_list
         }
-        print(project_dict[221])
         return APIResponse(results=res)
 
 
@@ -161,6 +153,21 @@ class ProjectCreateViewSet(ModelViewSet):
 
     queryset = models.Project.objects.all().order_by('id')
     serializer_class = serializers.CreateProjectModelSerializer
+
+
+class ProjectListViewSet(ModelViewSet):
+    queryset = models.Project.objects.all().order_by('id')
+    serializer_class = serializers.ProjectListModelSerializer
+
+
+# 监测设备信息
+class FacilityViewSet(ModelViewSet):
+
+    queryset = models.Facility.objects.all().order_by('id')
+    serializer_class = serializers.FacilityModelSerializer
+
+    filter_class = filters.FacilityFilterSet
+    filter_backends = [SearchFilter, DjangoFilterBackend]
 
 
 class ProjectStatusTimeViewSet(ModelViewSet):
@@ -187,7 +194,7 @@ class ProjectStatusTimeViewSet(ModelViewSet):
         return APIResponse(results=request_data)
 
 
-class IdcRoomViewSet(ProjectUpdateViewSet):
+class IdcRoomViewSet(MyProjectModelViewSet):
 
     queryset = models.IdcRoom.objects.all().order_by('id')
     serializer_class = serializers.IdcRoomModelSerializer
@@ -203,7 +210,7 @@ class ProjectManufacturerViewSet(ModelViewSet):
     serializer_class = serializers.ManufacturerModelSerializer
 
 
-class ContractViewSet(ModelViewSet):
+class ContractViewSet(MyProjectModelViewSet):
 
     queryset = models.Contract.objects.all()
     serializer_class = serializers.ContractModelSerializer
@@ -228,7 +235,7 @@ class OutsourcerListViewSet(ModelViewSet):
     serializer_class = serializers.OutsourcerModelSerializer
 
 
-class StockViewSet(ProjectUpdateViewSet):
+class StockViewSet(MyProjectModelViewSet):
 
     queryset = models.Stock.objects.all().order_by('id')
     serializer_class = serializers.StockModelSerializer
@@ -238,7 +245,7 @@ class StockViewSet(ProjectUpdateViewSet):
     filter_class = filters.StockFilterSet
 
 
-class InvoiceViewSet(ProjectUpdateViewSet):
+class InvoiceViewSet(MyProjectModelViewSet):
 
     queryset = models.Invoice.objects.all().order_by('-create_time')
     serializer_class = serializers.InvoiceModelSerializer
@@ -254,7 +261,7 @@ class InvoiceUpdateViewSet(ModelViewSet):
     serializer_class = serializers.InvoiceUpdateModelSerializer
 
 
-class InvoiceImageViewSet(ProjectUpdateViewSet):
+class InvoiceImageViewSet(MyProjectModelViewSet):
 
     queryset = models.InvoiceImage.objects.all()
     serializer_class = serializers.InvoiceImageModelSerializer
@@ -263,7 +270,7 @@ class InvoiceImageViewSet(ProjectUpdateViewSet):
     search_fields = ['invoice__id']
 
 
-class ProjectTraceViewSet(ProjectUpdateViewSet):
+class ProjectTraceViewSet(MyProjectModelViewSet):
 
     queryset = models.ProjectTrace.objects.all().order_by('-create_time')
     serializer_class = serializers.ProjectTraceModelSerializer
@@ -271,7 +278,55 @@ class ProjectTraceViewSet(ProjectUpdateViewSet):
     filter_class = filters.ProjectTraceFilterSet
     filter_backends = [SearchFilter, DjangoFilterBackend]
 
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
 
+        # 关联信息
+        user_list = personnel_models.User.objects.exclude(id=1)
+
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
+
+        serializer = self.get_serializer(queryset, many=True)
+        self.add_user(serializer.data, user_list)
+        return APIResponse(
+            data_msg='post ok',
+            results=serializer.data)
+
+    def add_user(self,data, user_list):
+        for var in data:
+            user = user_list.filter(id=var['user']).values('id','name', 'avatar').first()
+            var['userInfo'] = user if user else {}
+            var['subscriberList'] = user_list.filter(id__in=var['subscriber']).values('id','name', 'avatar')
+
+
+# 收藏
+class ProjectColletViewSet(APIView):
+
+    def post(self, request, *args, **kwargs):
+        d = request.data
+        # print(d)
+        project_obj = models.Project.objects.filter(id=d[0])
+        collect = [v['collect'] for v in project_obj.values('collect') if v['collect']]
+        # collect = [2,3]
+        if d[1]:
+            if d[2] not in collect:
+                collect.append(d[2])
+            else:
+                pass
+        else:
+            collect.remove(d[2])
+        # print(collect)
+        project_ser = serializers.ProjectCollect(instance=project_obj.first(), data={'collect':collect})
+        project_ser.is_valid(raise_exception=True)
+        project_ser.save()
+        # print(project_ser.data)
+        return APIResponse(
+            data_msg='collect ok',
+            results=project_ser.data
+        )
 
 ######
 # 标签组

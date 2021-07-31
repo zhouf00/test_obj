@@ -55,8 +55,8 @@ class auth2APIView(APIView):
         # print(request.data)
         auth_requests = MyRequest()
         userId = auth_requests.get_user(request.data['code'])
+        # print(userId)
         user_obj =models.User.objects.filter(username=userId['usr']).first()
-        # print(user_obj)
         if user_obj:
             # print('用户存在')
             user_ser = serializers.AuthModelSerializer(instance=user_obj, data=userId)
@@ -129,10 +129,34 @@ class UpdateUserStatusViewSet(GenericViewSet, mixins.UpdateModelMixin):
         )
 
 
+class UpdateUserProjectViewSet(ModelViewSet):
+    queryset = models.User.objects.exclude(id=1).filter(is_active=1)
+    serializer_class = serializers.UpdateUserProjectModelSerializer
+
+
 class UserListViewSet(ModelViewSet):
 
     queryset = models.User.objects.exclude(id=1).filter(is_active=1)
     serializer_class = serializers.UserListModelSerializer
+
+
+# 获取领导列表
+class UserLeaderViewSet(APIView):
+
+    queryset = models.User.objects.all()
+
+    def get(self, request, *args, **kwargs):
+        manager = request.query_params['user']
+        print(self.queryset.filter(name=manager))
+        departments = self.queryset.filter(name=manager).values('department', 'depttouser__department__parentid').first()
+
+        leaders = models.DeptToUser.objects.filter(department__in=departments).filter(isleader=True).values('user__name')
+
+        leader_list = [var['user__name'] for var in leaders]
+
+        return APIResponse(
+            results=leader_list
+        )
 
 
 ##################
@@ -185,3 +209,5 @@ class DeptLeaderViewSet(APIView):
                                          user__in=request_data['leaderList']).update(isleader=True)
         # print(models.DeptToUser.objects.filter(department_id=request_data['department'],isleader=True))
         return APIResponse(results=request.data)
+
+

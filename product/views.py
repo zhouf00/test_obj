@@ -53,3 +53,9 @@ class LifecycleViewSet(ModelViewSet):
 
     queryset = models.Lifecycle.objects.all()
     serializer_class = serializers.LifecycleModelSerializer
+
+
+class ProductionStatusViewSet(ModelViewSet):
+
+    queryset = models.ProductionStatus.objects.all()
+    serializer_class = serializers.ProductionStatusModelSerializer
