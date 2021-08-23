@@ -54,8 +54,5 @@ class MyProjectModelViewSet(ModelViewSet):
         self.perform_update(serializer)
         if 'project' in request.data and request.data['project']:
             UpdateTime(serializer.data)
-        return ({
-                    'userId': self.request.user.id,
-                    'name': self.request.user.name
-                }
+        return (self.request.user
         , serializer.data)

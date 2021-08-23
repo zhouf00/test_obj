@@ -39,23 +39,23 @@ class ProductionViewSet(ModelViewSet):
 ########
 class AisleViewSet(ModelViewSet):
 
-    queryset = models.Aisle.objects.all()
+    queryset = models.Aisle.objects.all().order_by('sort')
     serializer_class = serializers.AisleModelSerializer
 
 
 class PdStatusViewSet(ModelViewSet):
 
-    queryset = models.ProductStatus.objects.all()
+    queryset = models.ProductStatus.objects.all().order_by('sort')
     serializer_class = serializers.PdStatusModelSerializer
 
 
 class LifecycleViewSet(ModelViewSet):
 
-    queryset = models.Lifecycle.objects.all()
+    queryset = models.Lifecycle.objects.all().order_by('sort')
     serializer_class = serializers.LifecycleModelSerializer
 
 
 class ProductionStatusViewSet(ModelViewSet):
 
-    queryset = models.ProductionStatus.objects.all()
+    queryset = models.ProductionStatus.objects.all().order_by('sort')
     serializer_class = serializers.ProductionStatusModelSerializer

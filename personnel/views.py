@@ -170,7 +170,7 @@ class DeptViewSet(ModelViewSet):
 
 class DeptListViewSet(ModelViewSet):
 
-    queryset = models.Structure.objects.filter(parentid=1)
+    queryset = models.Structure.objects.filter(parentid__isnull=False)
     serializer_class = serializers.DeptListModelSerializer
 
 
@@ -211,3 +211,16 @@ class DeptLeaderViewSet(APIView):
         return APIResponse(results=request.data)
 
 
+class OverviewAreaViewSet(APIView):
+
+    def get(self, request, *args, **kwargs):
+        res = {}
+        for v in models.DeptToUser.objects.filter(department__parentid=6).filter(isleader=True).values(
+                'department_id','department__name', 'user__name'):
+            if v['department_id'] in res and res[v['department_id']]:
+                res[v['department_id']] =  '%s %s' % (res[v['department_id']], v['user__name'])
+            else:
+                res[v['department_id']] ='%s %s' % (v['department__name'], v['user__name'])
+        return APIResponse(
+            results=res
+        )

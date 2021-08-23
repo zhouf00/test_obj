@@ -131,6 +131,7 @@ class ProductionLog(BaseModel):
 ########
 class ProductStatus(models.Model):
     title = models.CharField(max_length=32, verbose_name='产品编号')
+    sort = models.SmallIntegerField(blank=True, null=True, verbose_name='排序')
 
     @property
     def info(self):
@@ -146,6 +147,7 @@ class ProductStatus(models.Model):
 
 class ProductionStatus(models.Model):
     title = models.CharField(max_length=32, verbose_name='出产产品状态')
+    sort = models.SmallIntegerField(blank=True, null=True, verbose_name='排序')
 
     @property
     def info(self):
@@ -162,6 +164,7 @@ class ProductionStatus(models.Model):
 class Lifecycle(models.Model):
 
     title = models.CharField(max_length=32, verbose_name='产品编号')
+    sort = models.SmallIntegerField(blank=True, null=True, verbose_name='排序')
 
     @property
     def info(self):

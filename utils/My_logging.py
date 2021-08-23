@@ -23,8 +23,8 @@ def logit(fun):
                 if 'project' not in res[1]:
                     res[1]['project'] = res[1]['id']
                 project_obj = e_models.Project.objects.all()
-                user_obj = p_models.User.objects.all()
-                test_messages(res[1], project_obj, user_obj, res[0]['userId'])
+                user_obj = p_models.User.objects.exclude(is_active=False)
+                test_messages(res[1], project_obj, user_obj, res[0])
                 return APIResponse(
                     data_msg='update ok',
                     results=res[1]

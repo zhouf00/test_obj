@@ -15,6 +15,9 @@ urlpatterns = [
     url(r'^task_priority/$', views.Task_PriorityViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^task_priority/update/(?P<pk>.*)/$', views.Task_PriorityViewSet.as_view({'post': 'update'})),
 
+    # 任务附件
+    url(r'^taskfile/$', views.TaskFileViewSet.as_view({'get': 'list', 'post': 'create'})),
+
     #
     url(r'^journal/$', views.JournalViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^journal/info/$', views.JournalViewSet.as_view({'get': 'retrieve'})),
@@ -31,7 +34,11 @@ urlpatterns = [
     url(r'^work_status/$', views.StatusViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^work_status/update/(?P<pk>.*)/$', views.StatusViewSet.as_view({'post': 'update'})),
 
-    # 其它工作环境
+    # 工作环境
     url(r'^other_env/$', views.OtherEnvViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^other_env/update/(?P<pk>.*)/$', views.OtherEnvViewSet.as_view({'post': 'update'})),
+
+    # 特殊环境
+    url(r'^special_env/$', views.SpecialEnvViewSet.as_view({'get': 'list', 'post': 'create'})),
+    url(r'^special_env/update/(?P<pk>.*)/$', views.SpecialEnvViewSet.as_view({'post': 'update'})),
 ]

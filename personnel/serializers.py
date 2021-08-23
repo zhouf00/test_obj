@@ -89,7 +89,7 @@ class AuthCreateUserModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.User
         fields = ['username', 'mobile', 'name', 'is_active', 'position',
-                  'avatar', 'gender', 'auth']
+                  'avatar', 'gender', 'auth','department']
 
     def validate(self, attrs):
         attrs['is_active'] = True

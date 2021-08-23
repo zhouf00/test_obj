@@ -37,15 +37,19 @@ class ProjectViewSet(MyProjectModelViewSet):
                 # print('你是部门领导')
                 # self.isleader = True
                 self.queryset = self.queryset.filter(
-                    Q(manager__in=self.request.user.deptmembers[1])
-                    |Q(builders__in=self.request.user.deptmembers[2])
+                    Q(manager__in=self.request.user.deptmembers[1]) |
+                    Q(builders__in=self.request.user.deptmembers[2]) |
+                    Q(salesman__in=self.request.user.deptmembers[2]) |
+                    Q(diagnosisman__in=self.request.user.deptmembers[2])
                 ).distinct()
             else:
                 # print('你不是部门领导')
                 # self.isleader = False
                 self.queryset = self.queryset.filter(
                     Q(manager=self.request.user.name) |
-                    Q(builders=self.request.user.id)
+                    Q(builders=self.request.user.id) |
+                    Q(salesman=self.request.user.id) |
+                    Q(diagnosisman=self.request.user.id)
                 ).distinct()
         return self.queryset
 
@@ -77,7 +81,7 @@ class ProjectClassifyViewSet(GenericViewSet):
             # 拿到部门领导身份
             if self.request.user.deptList:
                 # print('你是部门领导')
-                # self.isleader = True
+                self.isleader = True
                 self.queryset = self.queryset.filter(manager__in=self.request.user.deptmembers[1]).distinct()
             else:
                 # print('你不是部门领导')
@@ -171,7 +175,7 @@ class FacilityViewSet(ModelViewSet):
 
 
 class ProjectStatusTimeViewSet(ModelViewSet):
-    queryset = models.ProjectStatusTime.objects.all()
+    queryset = models.ProjectStatusTime.objects.all().order_by('time')
     serializer_class = serializers.ProjectStatusTimeSerializer
 
     filter_backends = [SearchFilter, DjangoFilterBackend]
@@ -267,7 +271,7 @@ class InvoiceImageViewSet(MyProjectModelViewSet):
     serializer_class = serializers.InvoiceImageModelSerializer
 
     filter_backends = [SearchFilter, DjangoFilterBackend]
-    search_fields = ['invoice__id']
+    filter_class = filters.InvoiceImageFilterSet
 
 
 class ProjectTraceViewSet(MyProjectModelViewSet):
@@ -333,19 +337,25 @@ class ProjectColletViewSet(APIView):
 #####
 class ProjectPriorityViewSet(ModelViewSet):
 
-    queryset = models.ProjectPriority.objects.all()
+    queryset = models.ProjectPriority.objects.all().order_by('sort')
     serializer_class = serializers.ProjectPrioritySerializer
+
+
+class ProjectPriority2ViewSet(ModelViewSet):
+
+    queryset = models.ProjectPrority2.objects.all().order_by('sort')
+    serializer_class = serializers.ProjectPriority2Serializer
 
 
 class MonitorTypeViewSet(ModelViewSet):
 
-    queryset = models.MonitorType.objects.all()
+    queryset = models.MonitorType.objects.all().order_by('sort')
     serializer_class = serializers.MonitorTypeModelSerializer
 
 
 class ProjectTypeViewSet(ModelViewSet):
 
-    queryset = models.ProjectType.objects.all()
+    queryset = models.ProjectType.objects.all().order_by('sort')
     serializer_class = serializers.ProjectTypeModelSerializer
 
 
@@ -357,13 +367,13 @@ class ProjectStatusViewSet(ModelViewSet):
 
 class ProjectAreaViewSet(ModelViewSet):
 
-    queryset = models.ProjectArea.objects.all()
+    queryset = models.ProjectArea.objects.all().order_by('sort')
     serializer_class = serializers.ProjectAreaModelSerializer
 
 
 class ProjectWorkingEnvViewSet(ModelViewSet):
 
-    queryset = models.ProjectWorkingEnv.objects.all()
+    queryset = models.ProjectWorkingEnv.objects.all().order_by('sort')
     serializer_class = serializers.ProjectWorkingEnvModelSerializer
 
 
@@ -384,6 +394,6 @@ class MonitorNumberViewSet(ModelViewSet):
 
 class TraceStatusViewSet(ModelViewSet):
 
-    queryset = models.TraceStatus.objects.all()
+    queryset = models.TraceStatus.objects.all().order_by('sort')
     serializer_class = serializers.TraceStatusSerializer
 

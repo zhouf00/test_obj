@@ -104,28 +104,28 @@ WSGI_APPLICATION = 'test_obj.wsgi.application'
 # SESSION_ENGINE = "django.contrib.sessions.backends.cache"
 # SESSION_CACHE_ALIAS = "default"
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': 'windit',
-        'HOST': '10.100.0.150',
-        'PORT': 33060,
-        'USER': 'root',
-        'PASSWORD':'test',
-        'OPTIONS': {
-            'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"',
-            'charset': 'utf8mb4'
-        }
-
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': 'windit',
+#         'HOST': '10.100.0.150',
+#         'PORT': 33060,
+#         'USER': 'root',
+#         'PASSWORD':'test',
+#         'OPTIONS': {
+#             'init_command': 'SET sql_mode="STRICT_TRANS_TABLES"',
+#             'charset': 'utf8mb4'
+#         }
+#
+#     }
+# }
 
 # 开发环境
 # DATABASES = {
@@ -187,8 +187,8 @@ MEDIA_URL = '/api/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # 企业微信使用
-WX_TOKEN = ''
-# WX_TOKEN = '_agCLNrykasCQU02WOb7E9FM3LAdVA5_xBMQvUb9YR1vb7KDmnjPr9A-6JB0yoMQ6VR-tVmHllkypK6pfMxLTdZx5tP2lEYRdvfpoWclxGtD6Dr1KKimpS-kGdeHtDwFYmtGVLIuzRWQc0QEYXxFOghPkaiErYzYeLosbVw3FdfScmzVAazLHQ2j7pUlb4CnfOpSbnNFxakWeuuLb2l39w'
+# WX_TOKEN = ''
+WX_TOKEN = 'DoMTMrz9cQwUQM8zVyanvw_Syk2EZNuGepLun-Hz5NFFb0f5Srkwh4V2306DSjosa24vjduqyCxJIakP27vgqHp-7RIp6YKiti4t-j_DAMxCaa9aE2i49Y9bklmDJjylm-jMOA8_8keGMf8JRjbAwtHa4izD-I_gIgdraphW7oDJUBwBv0Vq41f7QMgl3DUal-DyljLhxtNt6nbwcpJJDA'
 WX_JSAPITICKET = {
     'token': '',
     'ticket': ''

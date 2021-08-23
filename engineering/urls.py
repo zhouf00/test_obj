@@ -56,6 +56,9 @@ urlpatterns = [
     url(r'^projectTag/projectpriority/$', views.ProjectPriorityViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^projectTag/projectpriority/update/(?P<pk>.*)/$', views.ProjectPriorityViewSet.as_view({'post': 'update'})),
 
+    url(r'^projectTag/projectpriority2/$', views.ProjectPriority2ViewSet.as_view({'get': 'list', 'post': 'create'})),
+    url(r'^projectTag/projectpriority2/update/(?P<pk>.*)/$', views.ProjectPriority2ViewSet.as_view({'post': 'update'})),
+
     url(r'^projectTag/monitortype/$', views.MonitorTypeViewSet.as_view({'get': 'list', 'post': 'create'})),
     url(r'^projectTag/monitortype/update/(?P<pk>.*)/$', views.MonitorTypeViewSet.as_view({'post': 'update'})),
 

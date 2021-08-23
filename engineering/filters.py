@@ -33,6 +33,7 @@ class ProjectFilterSet(FilterSet):
     diagnosisman = filters.CharFilter(field_name='diagnosisman__name', lookup_expr='icontains')
     begin_time = filters.CharFilter(method='filter_begin_time')
     priority_list = filters.CharFilter(method='filter_priority_list')
+    priority2_list = filters.CharFilter(method='filter_priority2_list')
     type_list = filters.CharFilter(method='filter_type_list')
     product_list = filters.CharFilter(method='filter_product_list')
     province_list = filters.CharFilter(method='filter_province_list')
@@ -53,6 +54,10 @@ class ProjectFilterSet(FilterSet):
         value_list = value.split(',')
         return queryset.filter(priority__id__in=value_list)
 
+    def filter_priority2_list(self, queryset, name, value):
+        value_list = value.split(',')
+        return queryset.filter(priority2__id__in=value_list)
+
     def filter_type_list(self, queryset, name, value):
         value_list = value.split(',')
         return queryset.filter(type__id__in=value_list)
@@ -67,7 +72,7 @@ class ProjectFilterSet(FilterSet):
 
     class Meta:
         model = models.Project
-        fields = ['id', 'name', 'area', 'serial', 'sn', 'status', 'manufacturers', 'stock_finish', 'priority']
+        fields = ['id', 'name', 'area', 'serial', 'sn', 'status', 'manufacturers', 'stock_finish', 'priority',]
 
 
 class FacilityFilterSet(FilterSet):
@@ -115,6 +120,14 @@ class InvoiceFilterSet(FilterSet):
     class Meta:
         model = models.Invoice
         fields = ['project']
+
+class InvoiceImageFilterSet(FilterSet):
+
+    invoice = filters.CharFilter(field_name='invoice__id')
+
+    class Meta:
+        model = models.InvoiceImage
+        fields = []
 
 
 # 项目跟进筛选

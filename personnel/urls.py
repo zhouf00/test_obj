@@ -25,4 +25,5 @@ urlpatterns = [
 
     url(r'dept_user/$', views.DeptToUserViewSet.as_view()),
     url(r'dept_leader/$', views.DeptLeaderViewSet.as_view()),
+    url(r'overview_area/$', views.OverviewAreaViewSet.as_view()),
 ]

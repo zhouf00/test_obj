@@ -55,7 +55,8 @@ class TaskViewSet(ModelViewSet):
         # 关联信息
         userlist = p_models.User.objects.all()
         projectlist = e_models.Project.objects.all()
-        status = [{'id':1,'title': '未完成'}, {'id':2,'title': '已完成'},]
+        # status = [{'id':1,'title': '未完成'}, {'id':2,'title': '已完成'},]
+        status = models.Task_Status.objects.values('id', 'title')
 
         if page is not None:
             serializer = self.get_serializer(page, many=True)
@@ -70,8 +71,20 @@ class TaskViewSet(ModelViewSet):
 
     def addInfo(self, data, userlist, projectlist, status):
         for var in data:
-            var['executorInfo'] = userlist.filter(id__in=var['executor']).values('id', 'name').first() if len(var['executor']) > 0 else {}
-            var['submitterInfo'] = userlist.filter(id=var['submitter']).values('id', 'name').first()
+            user_list = userlist.filter(id__in=var['executor']+var['subscriber']+[var['submitter']]).values('id', 'name')
+            for v in user_list:
+                if v['id'] in var['executor']:
+                    var['executorInfo'] = v
+                    break
+                else:
+                    var['executorInfo'] = {}
+            for v in user_list:
+                if var['submitter'] == v['id']:
+                    var['submitterInfo'] = v
+                    break
+                else:
+                    var['submitterInfo'] = {}
+            var['subscriberList'] = [v for v in user_list if v['id'] in var['subscriber']]
             var['projectInfo'] =  projectlist.filter(id=var['project']).values('id', 'name').first() if var['project']  else {}
             var['statusInfo'] = [v for v in status if v['id'] == var['status'] ][0]
 
@@ -84,6 +97,24 @@ class TaskListViewSet(ModelViewSet):
     pagination_class = MyPageNumberPagination
     filter_class = filters.TaskFilter
     filter_backends = [SearchFilter, DjangoFilterBackend]
+
+
+class TaskFileViewSet(ModelViewSet):
+    queryset = models.TaskFile.objects.all()
+    serializer_class = serializers.TaskFileModelSerializer
+
+    filter_class = filters.TaskfileFilter
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+
+    def create(self, request, *args, **kwargs):
+        data = request.data
+        data['title'] = data['file'].name
+        serializer = self.get_serializer(data=data)
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return APIResponse(results=serializer.data)
+
 
 class JournalViewSet(ModelViewSet):
     queryset = models.WorkLogs.objects.all().order_by('-create_time')
@@ -161,7 +192,6 @@ class JournalViewSet(ModelViewSet):
         projectTrace_list = e_models.ProjectTrace.objects.filter(is_delete=False)
         user_list = p_models.User.objects.exclude(id=1)
         status = models.WorkStatus.objects.all()
-        # push_m()
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             self.add_summary(serializer.data, projectTrace_list, status, project, user_list=user_list)
@@ -170,7 +200,7 @@ class JournalViewSet(ModelViewSet):
         serializer = self.get_serializer(queryset, many=True)
         self.add_summary(serializer.data, projectTrace_list, status, project, user_list=user_list)
         return APIResponse(
-            data_msg='post ok',
+            data_msg='list ok',
             results=serializer.data)
 
     def create(self, request, *args, **kwargs):
@@ -271,14 +301,13 @@ class JournalViewSet(ModelViewSet):
             # 遍历工作
             for var in data['workList']:
                 # 判断是否有项目
-                print('打印', var)
+                # print('打印', var)
                 if 'project_id' in var and var['project_id']:
                     var['project'] = var['project_id']
                     # 判断项目是否与定位相同
                     if 'project' in data and var['project'] == data['project']:
                         if 'user_id' in var and var['user_id'] != user:
                             var['user'] = var['user_id']
-                            print('参与者', var['subscriber'])
                             var['subscriber'].append(user)
                             v_worklog = var['worklog']
                             if 'ln_worklog' not in data :
@@ -343,14 +372,13 @@ class JournalViewSet(ModelViewSet):
     def pLog_save(self, data):
         date = datetime.datetime.now()
         project_obj = e_models.Project.objects.all()
-        user_obj = p_models.User.objects.all()
+        user_obj = p_models.User.objects.exclude(is_active=False)
         pLog_obj = e_models.ProjectTrace.objects.filter(
                 create_time__year=date.strftime('%Y'),
                 create_time__month=date.strftime('%m'),
                 create_time__day=date.strftime('%d'),
         )
         new = []
-        # print(data['workList'])
         for var in data['workList']:
             if 'id' in var:
                 pLog_ser = e_serializers.ProjectTraceModelSerializer(instance=pLog_obj.filter(id=var['id']).first(), data=var)
@@ -360,7 +388,11 @@ class JournalViewSet(ModelViewSet):
                 pLog_ser = e_serializers.ProjectTraceModelSerializer(data=var)
             if pLog_ser.is_valid():
                 pLog_ser.save()
-                test_messages(pLog_ser.data, project_obj, user_obj, self.request.user)
+                if 'user' in pLog_ser.data and pLog_ser.data['user'] == self.request.user.id:
+                    if 'submitted' in data and data['submitted']:
+                        test_messages(pLog_ser.data, project_obj, user_obj, self.request.user)
+                    else:
+                        print(data['submitted'])
                 new.append(pLog_ser.data['id'])
             else:
                 return APIResponse(
@@ -372,7 +404,7 @@ class JournalViewSet(ModelViewSet):
         pLog_obj.filter(user=data['user']).exclude(id__in=new).delete()
         del_obj = pLog_obj.filter(subscriber=data['user']).exclude(id__in=new)
         if del_obj:
-            print('项目删除',del_obj.first().id)
+            # print('项目删除',del_obj.first().id)
             data['ln_worklog'] = None
             e_models.ProjectTrace.objects.get(id=del_obj.first().id).subscriber.remove(data['user'])
 
@@ -396,7 +428,7 @@ class JournalViewSet(ModelViewSet):
 
     # 产品删除
     def del_productionLog(self, obj, old):
-        print('删除', old, obj.exclude(id__in=old))
+        # print('删除', old, obj.exclude(id__in=old))
         obj.exclude(id__in=old).delete()
 
     # 获取数据时，添加内容
@@ -413,12 +445,6 @@ class JournalViewSet(ModelViewSet):
                 var['userInfo'] = user if user else {}
                 content = projectTrace_list.filter(worklog__in=worklog_list).filter(
                     Q(user=var['user'])|Q(subscriber=var['user'])).values('project','content')
-                # print(var['userInfo'],worklog_list, content)
-                # if not content:
-                #     content = projectTrace_list.filter(
-                #         create_time__year=date.strftime('%Y'),
-                #         create_time__month=date.strftime('%m'),
-                #         create_time__day=date.strftime('%d'), subscriber=self.request.user.id).values('project','content')
                 content = ''.join(['<%s>\n\t %s'%(project.filter(id=v['project']).first(),v['content']) for v in content ])
                 var['content'] = '%s %s'%(var['content'], content) if var['content'] else content
         else:
@@ -511,16 +537,8 @@ class SummarizingViewSet(ModelViewSet):
         year = t.strftime('%Y')
         month = t.strftime('%m')
         days = (datetime.date(t.year,t.month+1,1)-datetime.timedelta(1)).day
+        nano_dict = {v['id']:v['title'][0:1] for v in models.WorkStatus.objects.values('id','title')}
         res_list = []
-        nano_dict = {
-            '1': '休',
-            '2': '假',
-            '3': '复',
-            '4': '安',
-            '5': '调',
-            '6': '消',
-            '7': '测',
-        }
         default_tmp = {}
         for i in range(1, days + 1):
             default_tmp['%d日'%i] = ''
@@ -535,9 +553,8 @@ class SummarizingViewSet(ModelViewSet):
                 user=user['id']).order_by('-update_time').values('update_time__day','work_status')
             for var in td:
                 print('%d日'%var['update_time__day'], var['work_status'])
-                tmp['%d日'%var['update_time__day']] = [ var['work_status'], nano_dict[str(var['work_status'])] ]
+                tmp['%d日'%var['update_time__day']] = [ var['work_status'], nano_dict[var['work_status']] ]
             res_list.append(tmp)
-            print(tmp)
         return res_list
 
     def get_users(self, users):
@@ -568,26 +585,31 @@ class SummaryViewSet(ModelViewSet):
 #
 #############
 class StatusViewSet(ModelViewSet):
-    queryset = models.WorkStatus.objects.all()
+    queryset = models.WorkStatus.objects.all().order_by('sort')
     serializer_class = serializers.StatusModelSerializer
 
 
 class OtherEnvViewSet(ModelViewSet):
-    queryset = models.OtherEnv.objects.all()
+    queryset = models.OtherEnv.objects.all().order_by('sort')
     serializer_class = serializers.OtherEnvModelSerializer
 
 
+class SpecialEnvViewSet(ModelViewSet):
+    queryset = models.SpecialEnv.objects.all().order_by('sort')
+    serializer_class = serializers.SpecialEnvModelSerializer
+
+
 class CarRentalViewSet(ModelViewSet):
-    queryset = models.CarRental.objects.all()
+    queryset = models.CarRental.objects.all().order_by('sort')
     serializer_class = serializers.CarRentalModelSerializer
 
 
 # 任务状态
 class Task_StatusViewSet(ModelViewSet):
-    queryset = models.Task_Status.objects.all()
+    queryset = models.Task_Status.objects.all().order_by('sort')
     serializer_class = serializers.Task_StatusModelSerializer
 
 # 来源
 class Task_PriorityViewSet(ModelViewSet):
-    queryset = models.Task_Priority.objects.all()
+    queryset = models.Task_Priority.objects.all().order_by('sort')
     serializer_class = serializers.Task_PriorityModelSerializer

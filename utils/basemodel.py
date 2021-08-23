@@ -16,4 +16,7 @@ def upload_path_image(instance, filename):
     # print('/'.join([datetime.today().strftime("%Y%m%d"), 'img', filename]))
     return '/'.join([datetime.today().strftime("%Y%m%d"), 'img', filename])
 
-# 3、
+# 3、图片保存路径
+def upload_path_file(instance, filename):
+    # print('/'.join([datetime.today().strftime("%Y%m%d"), 'img', filename]))
+    return '/'.join([datetime.today().strftime("%Y%m%d"), 'file', filename])

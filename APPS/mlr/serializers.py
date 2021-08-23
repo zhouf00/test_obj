@@ -10,6 +10,12 @@ class TaskModelSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
 
+class TaskFileModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.TaskFile
+        fields = '__all__'
+
+
 class JournalModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.WorkLogs
@@ -32,6 +38,12 @@ class StatusModelSerializer(serializers.ModelSerializer):
 class OtherEnvModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.OtherEnv
+        fields = '__all__'
+
+
+class SpecialEnvModelSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.SpecialEnv
         fields = '__all__'
 
 

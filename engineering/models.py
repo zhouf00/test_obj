@@ -27,12 +27,16 @@ class Project(BaseModel):
     check_time = models.DateTimeField(blank=True, null=True, verbose_name='验收时间')
     entrance_time = models.DateTimeField(blank=True, null=True, verbose_name='预计入场时间')
     finish_time = models.DateTimeField(blank=True, null=True, verbose_name='预计完成时间')
+    out_warranty = models.DateTimeField(blank=True, null=True, verbose_name='出质保时间')
+
+    submitter = models.SmallIntegerField(blank=True, null=True,verbose_name='关联-(user) 提交人')
 
     collect = models.ManyToManyField(
         to='personnel.User',
         db_constraint=False,
         related_name='collect',
         blank=True,
+        verbose_name='收藏'
     )
 
     salesman = models.ManyToManyField(
@@ -40,6 +44,7 @@ class Project(BaseModel):
         db_constraint=False,
         related_name='sales_project',
         blank=True,
+        verbose_name='销售人员'
     )
 
     diagnosisman = models.ManyToManyField(
@@ -47,6 +52,15 @@ class Project(BaseModel):
         db_constraint=False,
         related_name='diagnosis_project',
         blank=True,
+        verbose_name='诊断人员'
+    )
+
+    FAEman = models.ManyToManyField(
+        to='personnel.User',
+        db_constraint=False,
+        related_name='FAEman_project',
+        blank=True,
+        verbose_name='技术支持人员'
     )
 
     manufacturers = models.ManyToManyField(
@@ -67,6 +81,13 @@ class Project(BaseModel):
         on_delete=models.CASCADE,
         related_name='project',
         blank=True, null=True,
+    )
+
+    priority2 = models.ManyToManyField(
+        to='ProjectPrority2',
+        db_constraint=False,
+        related_name='project2',
+        blank=True,
     )
 
     type = models.ForeignKey(
@@ -449,6 +470,7 @@ class MonitorType(models.Model):
         blank=True
     )
     title = models.CharField(max_length=64, unique=True, verbose_name='监测名称')
+    sort = models.SmallIntegerField(blank=True, null=True, verbose_name='排序')
 
     @property
     def info(self):
@@ -469,6 +491,7 @@ class MonitorType(models.Model):
 class ProjectPriority(models.Model):
 
     title = models.CharField(max_length=64, unique=True, verbose_name='优先级名称')
+    sort = models.SmallIntegerField(blank=True, null=True, verbose_name='排序')
 
     @property
     def info(self):
@@ -486,9 +509,30 @@ class ProjectPriority(models.Model):
         verbose_name_plural = verbose_name
 
 
+class ProjectPrority2(models.Model):
+    title = models.CharField(max_length=64, unique=True, verbose_name='优先级名称')
+    sort = models.SmallIntegerField(blank=True, null=True, verbose_name='排序')
+
+    @property
+    def info(self):
+        var = {
+            'id': self.id,
+            'title': self.title,
+        }
+        return var
+
+    def __str__(self):
+        return self.title
+
+    class Meta:
+        verbose_name = '优先级2'
+        verbose_name_plural = verbose_name
+
+
 class ProjectWorkingEnv(models.Model):
 
     title = models.CharField(max_length=64, unique=True, verbose_name='环境名称')
+    sort = models.SmallIntegerField(blank=True, null=True, verbose_name='排序')
 
     @property
     def info(self):
@@ -530,6 +574,7 @@ class ProjectStatus(models.Model):
 class ProjectArea(models.Model):
 
     title = models.CharField(max_length=64, unique=True, verbose_name='区域名称')
+    sort = models.SmallIntegerField(blank=True, null=True, verbose_name='排序')
 
     @property
     def info(self):
@@ -550,6 +595,7 @@ class ProjectArea(models.Model):
 class ProjectType(models.Model):
 
     title = models.CharField(max_length=64, unique=True, verbose_name='项目类型')
+    sort = models.SmallIntegerField(blank=True, null=True, verbose_name='排序')
 
     @property
     def info(self):
@@ -570,6 +616,7 @@ class ProjectType(models.Model):
 class StockFinish(models.Model):
 
     title = models.CharField(max_length=64, unique=True, verbose_name='标签')
+    sort = models.SmallIntegerField(blank=True, null=True, verbose_name='排序')
 
     @property
     def info(self):
@@ -604,6 +651,7 @@ class MonitorNumber(models.Model):
 class TraceStatus(models.Model):
 
     title = models.CharField(max_length=64, verbose_name='项目跟进状态')
+    sort = models.SmallIntegerField(blank=True, null=True, verbose_name='排序')
 
     @property
     def info(self):

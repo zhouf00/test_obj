@@ -64,6 +64,7 @@ class ProjectModelSerializer(serializers.ModelSerializer):
             'id', 'is_delete', 'name', 'address', 'sn', 'update_time', 'entrance_time', 'finish_time', 'begin_time', 'check_time',
             'facility_count', 'manager', 'memo', 'pj_sn', 'stock_finish', 'product', 'manufacturers','priority','serial',
             'type', 'province', 'monitor_type', 'area', 'working_env', 'diagnosisman', 'salesman', 'builders', 'collect',
+            'out_warranty','submitter', 'priority2', 'FAEman',
             # 自定义信息
             'monitortypeList', 'typeInfo', 'statusInfo', 'areaInfo', 'working_envInfo', 'manufacturersList',
             'monitorNumberList', 'diagnosismanList', 'buildersList', 'priorityInfo', 'trace_statusInfo'
@@ -91,7 +92,7 @@ class ProjectModelSerializer(serializers.ModelSerializer):
 class ProjectListModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Project
-        fields = ['id', 'name', 'status','builders']
+        fields = ['id', 'name', 'serial', 'status','builders']
 
 
 # 项目删除的序列化
@@ -198,44 +199,52 @@ class ProjectCollect(serializers.ModelSerializer):
 class ProjectPrioritySerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ProjectPriority
-        fields = ['id', 'title']
+        fields = '__all__'
+
+
+class ProjectPriority2Serializer(serializers.ModelSerializer):
+    class Meta:
+        model = models.ProjectPrority2
+        fields = '__all__'
+
 
 class MonitorTypeModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.MonitorType
-        fields = ['id', 'title']
+        fields = '__all__'
+
 
 class ProjectTypeModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.ProjectType
-        fields = ['id', 'title']
+        fields = '__all__'
 
 
 class ProjectStatusModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ProjectStatus
-        fields = ['id', 'title']
+        fields = '__all__'
 
 
 class ProjectAreaModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ProjectArea
-        fields = ['id', 'title']
+        fields = '__all__'
 
 
 class ProjectWorkingEnvModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.ProjectWorkingEnv
-        fields = ['id', 'title']
+        fields = '__all__'
 
 
 class StockFinishModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.StockFinish
-        fields = ['id', 'title']
+        fields = '__all__'
 
 
 class MonitorNumberModelSerializer(serializers.ModelSerializer):
@@ -249,4 +258,4 @@ class TraceStatusSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.TraceStatus
-        fields = ['id', 'title']
+        fields = '__all__'
