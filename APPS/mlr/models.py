@@ -39,6 +39,9 @@ class Task(BaseModel):
     project = models.SmallIntegerField(blank=True, null=True,
                                        verbose_name='关联-(project) 项目信息')
 
+    def __str__(self):
+        return self.title
+
 
 # 任务单日志
 class TaskLogs(BaseModel):

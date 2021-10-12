@@ -13,10 +13,17 @@ class LimitFilter:
 from django_filters.rest_framework.filterset import FilterSet
 # 自定义过滤字段
 from django_filters import filters
+
 class ProductionFilterSet(FilterSet):
 
-    project = filters.CharFilter(field_name='project__id')
+    project = filters.CharFilter(field_name='project__id',)
+    sn = filters.CharFilter(field_name='sn')
+    # project = filters.CharFilter(method='filter_project')
+    #
+    # def filter_project(self, queryset, name, value):
+    #     print(value)
+    #     return queryset.filter()
 
     class Meta:
         model = models.Production
-        fields = ['project']
+        fields = []

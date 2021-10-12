@@ -8,7 +8,7 @@ urlpatterns = [
     url(r'^login/$', views.LoginAPIView.as_view()),
     url(r'^logout/$', views.LogoutAPIView.as_view()),
     url(r'^auth2/$', views.auth2APIView.as_view()),
-    url(r'^user/$', views.UserViewSet.as_view({'get':'info'})),
+    url(r'^userinfo/$', views.UserViewSet.as_view({'get':'info'})),
 
     url(r'^list/$', views.UserInfoViewSet.as_view({'get':'list'})),
     url(r'^userlist/$', views.UserListViewSet.as_view({'get': 'list'})),

@@ -71,6 +71,10 @@ class Production(BaseModel):
     sw = models.CharField(max_length=32, blank=True, null=True, verbose_name='嵌入式版本')
     ip = models.TextField(blank=True, null=True, verbose_name='采集器IP')
     # sensor = models.TextField(blank=True, null=True, verbose_name='传感器')
+    status = models.SmallIntegerField(blank=True, null=True,
+        verbose_name='关联-(ProductionStatus) 采集器状态')
+    user = models.SmallIntegerField(blank=True, null=True,
+        verbose_name='关联-(User) 提交人')
     memo = models.TextField(blank=True, null=True, verbose_name='备注')
 
     lifecycle = models.ForeignKey(

@@ -9,17 +9,15 @@ class JsApiConfig(MyRequest):
 
     @property
     def JsapiTicket(self):
-        return settings.WX_JSAPITICKET['token']
+        return settings.WX_JSAPITICKET['ticket']
 
+    # 这里验证有应该有问题
     def get_config(self, params):
         noncestr = 'Wm3WZYTPz0wzccnWaa'
         timestamp = int(time.time())
-        # 保存ticket过期不验证
-        if not self.Token or self.Token != settings.WX_JSAPITICKET['token']:
-            settings.WX_JSAPITICKET['token'] = self.Token
-            jsapiticket = self.get_QyTicket()
-        else:
-            jsapiticket = self.JsapiTicket
+
+        jsapiticket = self.get_QyTicket()
+
         api_str = 'jsapi_ticket={JSAPITICKET}&noncestr={NONCESTR}&timestamp={TIMESTAMP}&url={URL}'.format(
             JSAPITICKET=jsapiticket, NONCESTR=noncestr, TIMESTAMP=timestamp, URL=params['url']
         )
@@ -34,6 +32,11 @@ class JsApiConfig(MyRequest):
         if not self.Token:
             self.get_token()
         res = requests.get(_url.format(ACCESS_TOKEN=self.Token)).json()
+        print('返回值',res)
+        # 保存ticket过期不验证
+        if res['errcode'] != 0:
+            self.get_token()
+            res = requests.get(_url.format(ACCESS_TOKEN=self.Token)).json()
         settings.WX_JSAPITICKET['ticket'] = res['ticket']
         return res['ticket']
 

@@ -32,6 +32,8 @@ urlpatterns = [
     url(r'^outsourcer/$', views.OutsourcerViewSet.as_view({'get': 'list', 'post':'create'})),
     url(r'^outsourcer/list/$', views.OutsourcerListViewSet.as_view({'get': 'list'})),
     url(r'^outsourcer/(?P<pk>.*)/$', views.OutsourcerViewSet.as_view({'post': 'update'})),
+    url(r'^payment/$', views.PaymentViewSet.as_view({'get': 'list', 'post':'create'})),
+    url(r'^payment/(?P<pk>.*)/$', views.PaymentViewSet.as_view({'post': 'update'})),
 
     # 机房信息
     url(r'^idcroom/$', views.IdcRoomViewSet.as_view({'get': 'list'})),

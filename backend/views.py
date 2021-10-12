@@ -14,6 +14,7 @@ class JsApiAPIView(APIView):
         params = request.data
         jsapi = JsApiConfig()
         config = jsapi.get_config(params)
+        print(config)
         return APIResponse(
             data_msg='jsapi ok',
             results=config

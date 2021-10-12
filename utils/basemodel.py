@@ -16,7 +16,14 @@ def upload_path_image(instance, filename):
     # print('/'.join([datetime.today().strftime("%Y%m%d"), 'img', filename]))
     return '/'.join([datetime.today().strftime("%Y%m%d"), 'img', filename])
 
-# 3、图片保存路径
+# 3、文件保存路径
 def upload_path_file(instance, filename):
-    # print('/'.join([datetime.today().strftime("%Y%m%d"), 'img', filename]))
     return '/'.join([datetime.today().strftime("%Y%m%d"), 'file', filename])
+
+# 4、通用文件保存
+def upload_path_file_un(instance, filename):
+    print(instance.task, type(instance))
+    if 'project' not in instance:
+        print('project')
+    print(filename)
+    return

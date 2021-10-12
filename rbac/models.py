@@ -63,6 +63,9 @@ class Auth(models.Model):
     def menuList(self):
         return self.menu.values('id', 'title')
 
+    def __str__(self):
+        return self.title
+
     class Meta:
         verbose_name = '权限表'
         verbose_name_plural = verbose_name

@@ -6,6 +6,7 @@ from django.db.models import Q, Sum
 
 from engineering import models, serializers, filters
 from personnel import models as personnel_models
+from mlr import models as mlr_models
 
 from utils.response import APIResponse
 from utils.pagenations import MyPageNumberPagination
@@ -21,15 +22,22 @@ class ProjectViewSet(MyProjectModelViewSet):
     pagination_class = MyPageNumberPagination
     filter_class = filters.ProjectFilterSet
     filter_backends = [SearchFilter, DjangoFilterBackend]
+    isleader = False
 
     def get_queryset(self):
         super().get_queryset()
         # 拿到管理员身份
         role = self.request.user.roleList
-        if '超级管理员' in role:
+        for var in role:
+            if '超级管理员' in var:
+                self.isleader = True
+                break
+            elif '项目管理' in var:
+                self.isleader = True
+                break
+        if self.isleader:
+            # self.isleader = True
             # print('你是管理员')
-            pass
-        elif '普通用户'in role and len(role)>1:
             pass
         else:
             # 拿到部门领导身份
@@ -74,7 +82,7 @@ class ProjectClassifyViewSet(GenericViewSet):
         if '超级管理员' in role:
             # print('你是管理员')
             pass
-        elif '普通用户'in role and len(role)>1:
+        elif '普通用户'in role and len(role) > 1:
             pass
         else:
             pass
@@ -114,15 +122,21 @@ class ProjectOverview(APIView):
 
     def get(self, request, *args, **kwargs):
         project_dict = {}
-
-        queryset = self.queryset.filter(Q(builders__isnull=False) |Q(priority__isnull=False)).values(
-            'id', 'name', 'priority__title', 'province', 'status__title', 'builders__name','update_time')
-        query_user = self.query_user.filter(project__isnull=True).filter(department__in=[6]).filter(is_active=1)
+        params = request.query_params
+        if 'group_list' in params and params['group_list']:
+            department = params['group_list'].split(',')
+            queryset = self.queryset.filter(Q(builders__department__in=department) ) \
+                .values('id', 'name', 'priority__title', 'province', 'status__title', 'builders__name', 'update_time')
+        else:
+            queryset = self.queryset.filter(Q(builders__isnull=False) |Q(priority__isnull=False))\
+                .values('id', 'name', 'priority__title', 'province', 'status__title', 'builders__name','update_time')
+        query_user = self.query_user.filter(project__isnull=True)\
+            .filter(Q(department=6)|Q(depttouser__department__parentid=6))\
+            .filter(is_active=1).distinct()
         users = []
         # print(users)
         user_list = users
         for var in queryset:
-            # print(var['id'] in project_dict.keys())
             if var['id'] in project_dict.keys() :
                 project_dict[var['id']]['builders'] += ',%s'%var['builders__name']
             else:
@@ -162,6 +176,10 @@ class ProjectCreateViewSet(ModelViewSet):
 class ProjectListViewSet(ModelViewSet):
     queryset = models.Project.objects.all().order_by('id')
     serializer_class = serializers.ProjectListModelSerializer
+
+    # pagination_class = MyPageNumberPagination
+    filter_class = filters.ProjectListFilterSet
+    filter_backends = [SearchFilter, DjangoFilterBackend]
 
 
 # 监测设备信息
@@ -220,6 +238,14 @@ class ContractViewSet(MyProjectModelViewSet):
     serializer_class = serializers.ContractModelSerializer
 
     filter_class = filters.ContractFilterSet
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+
+
+class PaymentViewSet(ModelViewSet):
+    queryset = models.Payment.objects.all()
+    serializer_class = serializers.PaymentModelSerializer
+
+    filter_class = filters.PaymentFilterSet
     filter_backends = [SearchFilter, DjangoFilterBackend]
 
 
@@ -288,20 +314,30 @@ class ProjectTraceViewSet(MyProjectModelViewSet):
 
         # 关联信息
         user_list = personnel_models.User.objects.exclude(id=1)
+        traceStatus_list = models.TraceStatus.objects.all()
+        task_list = mlr_models.Task.objects.all()
+        project_list = models.Project.objects.all()
 
         if page is not None:
             serializer = self.get_serializer(page, many=True)
             return self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        self.add_user(serializer.data, user_list)
+        self.add_user(serializer.data, user_list, traceStatus_list, task_list, project_list)
         return APIResponse(
             data_msg='post ok',
             results=serializer.data)
 
-    def add_user(self,data, user_list):
+    def add_user(self,data, user_list, traceStatus_list, task_list, project_list):
+        traceStatus_dict = {v['id']:v['title'] for v in traceStatus_list.values('id','title')}
+        task_dict = {v['id']: v['title'] for v in task_list.values('id', 'title')}
+        project_dict = {v['id']: v['name'] for v in project_list.values('id', 'name')}
+
         for var in data:
             user = user_list.filter(id=var['user']).values('id','name', 'avatar').first()
+            var['traceStatus'] = traceStatus_dict[var['trace_status']] if var['trace_status'] else ''
+            var['taskInfo'] = task_dict[var['task']] if var['task'] else ''
+            var['projectInfo'] = project_dict[var['project']] if var['project'] else ''
             var['userInfo'] = user if user else {}
             var['subscriberList'] = user_list.filter(id__in=var['subscriber']).values('id','name', 'avatar')
 

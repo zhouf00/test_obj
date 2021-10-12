@@ -21,8 +21,7 @@ class ProductionModelSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Production
-        fields = ['id', 'sn', 'facility', 'sw', 'ip', 'memo', 'product', 'lifecycle', 'project',
-                  'productInfo', 'lifecycleInfo']
+        fields = '__all__'
 
     def validate(self, attrs):
         if 'sn' in attrs and attrs['sn']:

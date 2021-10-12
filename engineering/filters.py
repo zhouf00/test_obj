@@ -31,16 +31,26 @@ class ProjectFilterSet(FilterSet):
     builder = filters.CharFilter(field_name='builders__name', lookup_expr='icontains')
     salesman = filters.CharFilter(field_name='salesman__name', lookup_expr='icontains')
     diagnosisman = filters.CharFilter(field_name='diagnosisman__name', lookup_expr='icontains')
+    FAEman = filters.CharFilter(field_name='FAEman__name', lookup_expr='icontains')
     begin_time = filters.CharFilter(method='filter_begin_time')
+    check_time = filters.CharFilter(method='filter_check_time')
     priority_list = filters.CharFilter(method='filter_priority_list')
     priority2_list = filters.CharFilter(method='filter_priority2_list')
     type_list = filters.CharFilter(method='filter_type_list')
     product_list = filters.CharFilter(method='filter_product_list')
     province_list = filters.CharFilter(method='filter_province_list')
+    traceStatus_list = filters.CharFilter(method='filter_traceStatus_list')
+
 
     def filter_begin_time(self, queryset, name, value):
         begin_time = time.strftime("%Y", time.localtime(int(value)/1000))
         return queryset.filter(begin_time__year=begin_time)
+
+    def filter_check_time(self, queryset, name, value):
+        print(time.localtime(int(value) / 1000))
+        year = time.strftime("%Y", time.localtime(int(value) / 1000))
+        month = time.strftime("%m", time.localtime(int(value) / 1000))
+        return queryset.filter(check_time__year=year).filter(check_time__month=month)
 
     def filter_area_list(self, queryset, name, value):
         value_list = value.split(',')
@@ -70,9 +80,27 @@ class ProjectFilterSet(FilterSet):
         value_list = value.split(',')
         return queryset.filter(province__in=value_list)
 
+    def filter_traceStatus_list(self, queryset, name, value):
+        value_list = value.split(',')
+        project_list = [v['project'] for v in models.ProjectTrace.objects.filter(trace_status__in=value_list).values('project').distinct()]
+        return queryset.filter(id__in=project_list)
+
     class Meta:
         model = models.Project
         fields = ['id', 'name', 'area', 'serial', 'sn', 'status', 'manufacturers', 'stock_finish', 'priority',]
+
+
+class ProjectListFilterSet(FilterSet):
+
+    outsourcer = filters.CharFilter(method='filter_outsourcer')
+
+    def filter_outsourcer(self, queryset, name, value):
+        contract_list = [v['id'] for v in models.Contract.objects.filter(name=value).values('id')]
+        return queryset.filter(contract__in=contract_list).distinct()
+
+    class Meta:
+        model = models.Project
+        fields = []
 
 
 class FacilityFilterSet(FilterSet):
@@ -87,12 +115,11 @@ class OutsourcerFilterSet(FilterSet):
     project = filters.CharFilter(method='filter_project')
 
     def filter_project(self, queryset, name, value):
-        print(queryset.filter(contract__project=value))
-        return queryset.filter(contract__project=value)
+        return queryset.filter(contract__project=value).distinct()
 
     class Meta:
         model = models.Outsourcer
-        fields = ['title', 'project']
+        fields = ['id']
 
 
 class IdcRoomFilterSet(FilterSet):
@@ -141,16 +168,26 @@ class ProjectTraceFilterSet(FilterSet):
 
     class Meta:
         model = models.ProjectTrace
-        fields = []
+        fields = ['outsourcer']
 
 
 class ContractFilterSet(FilterSet):
 
     project = filters.CharFilter(field_name='project__id')
+    outsourcer = filters.CharFilter(field_name='name')
 
     class Meta:
         model = models.Contract
-        fields = ['project']
+        fields = []
+
+
+class PaymentFilterSet(FilterSet):
+
+    contract = filters.CharFilter(field_name='contract')
+
+    class Meta:
+        model = models.Payment
+        fields = []
 
 
 class MonitorNumberFilterSet(FilterSet):

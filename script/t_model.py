@@ -23,7 +23,7 @@ from mlr import models as mlr_models
 # print(ProjectStatusTime.objects.filter(status_id=1))
 # print(time.strftime("%Y", time.localtime(int('1577808000000')/1000)))
 # p = list(Project.objects.values('id', 'sn', 'serial', 'begin_time', 'type__title'))
-# print(p)
+# print(Project.objects.filter(contract__name=2))
 # type = {
 #     '水泥': '06',
 #     '电力石化': '02',
@@ -150,10 +150,13 @@ u6 = '蔡志雄'
 # print(personnel_models.Structure.objects.filter(parentid__isnull=False))
 # print(personnel_models.DeptToUser.objects.filter(department__parentid=101).filter(isleader=True).values('department__name','user__name'))
 
+# 部门查询
+# print(personnel_models.User.objects.filter(Q(department=6)|Q(depttouser__department__parentid=6)))
+
 ##############
 # 日报功能
 ##############
-date = datetime.datetime.now()
+# date = datetime.datetime.now()
 # print(date.strftime('%Y%m%d'))
 a = mlr_models.WorkLogs.objects.values()
 # print(len(a))
@@ -165,3 +168,17 @@ c = mlr_models.OtherEnv.objects.exclude()
 # print(mlr_models.Task.objects.filter(subscriber=2).values())
 # print('|'.join([v['username'] for v in personnel_models.User.objects.filter(id__in=[2,2,3,3,4,5,7,7]).exclude(username='user3').values('username')]))
 # print(mlr_models.Task.objects.filter(executor=2))
+# print(mlr_models.WorkLogs.objects.filter(user=3).filter(create_time__lte='2021-9-1').order_by('-update_time').values('update_time__month','update_time__day'))
+# print(ProjectTrace.objects.filter(worklog=111).values('subscriber','create_time'))
+trace_obj = ProjectTrace.objects.all()
+
+for var in trace_obj:
+    tmp_date = var.create_time
+    user_list = [v['id']  for v in var.subscriber.values('id')]
+    # if len(user_list) > 0:
+    #     print(var.worklog, mlr_models.WorkLogs.objects.filter(create_time__year=tmp_date.year, create_time__month=tmp_date.month,
+    #                                        create_time__day=tmp_date.day, user__in=user_list,).values('create_time','ln_worklog','plan'))
+        # mlr_models.WorkLogs.objects.update(ln_worklog=None)
+        # print(mlr_models.WorkLogs.objects.filter(create_time__year=tmp_date.year, create_time__month=tmp_date.month,
+        #                                    create_time__day=tmp_date.day, user__in=user_list, project=var.project_id)
+        #       .update(ln_worklog=var.worklog))

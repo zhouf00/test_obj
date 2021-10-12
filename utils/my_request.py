@@ -22,7 +22,7 @@ class MyRequest:
 
     def _get_userid(self, code=None):
         _url = 'https://qyapi.weixin.qq.com/cgi-bin/user/getuserinfo?access_token={ACCESS_TOKEN}&code={CODE}'
-        # print('获取用户名token:', self.Token)
+        print('获取用户名token:', self.Token,code)
         return requests.get(_url.format(ACCESS_TOKEN=self.Token, CODE=code))
 
     def _get_userInfo(self, userid):
@@ -33,6 +33,7 @@ class MyRequest:
     def get_user(self, code=None):
         data = dict()
         userId = self._get_userid(code).json()
+        print('用户名返回值', userId)
         # userId = {'errcode': 0, 'UserId': 'ZhouWenXing', 'errmsg': 'ok'}
         if userId['errcode'] == 41001 or userId['errcode'] == 42001:
             self.get_token()

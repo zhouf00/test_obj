@@ -250,10 +250,13 @@ class Contract(BaseModel):
     name = models.ForeignKey('Outsourcer', on_delete=models.CASCADE,
                              related_name='contract', verbose_name='承包商信息')
     context = models.TextField(blank=True, null=True, verbose_name='承包内容')
-    payment = models.IntegerField(blank=True, null=True, verbose_name='承包货款')
-    payment_rate = models.SmallIntegerField(default=0, blank=True, null=True, verbose_name='货款进度')
+    payment = models.FloatField(blank=True, null=True, verbose_name='承包款')
+    payment_paid = models.FloatField(blank=True, null=True, verbose_name='已付款')
+    payment_rate = models.SmallIntegerField(default=0, blank=True, null=True, verbose_name='承包款进度')
     payment_time = models.DateTimeField(blank=True, null=True, verbose_name='付款时间')
     delivery_time = models.DateTimeField(blank=True, null=True, verbose_name='加入时间')
+
+    submitter = models.SmallIntegerField(blank=True, null=True, verbose_name='关联-(user) 提交人')
 
     def nameInfo(self):
         return self.name.info()
@@ -262,6 +265,18 @@ class Contract(BaseModel):
         verbose_name = '承包信息'
         verbose_name_plural = verbose_name
 
+
+class Payment(BaseModel):
+
+    contract = models.SmallIntegerField(verbose_name='关联-(Contract) 承包信息')
+    amount = models.FloatField(blank=True, null=True, verbose_name='已付款')
+    payment_time = models.DateTimeField(blank=True, null=True, verbose_name='付款时间')
+    memo = models.TextField(blank=True, null=True, verbose_name='备注')
+    submitter = models.SmallIntegerField(blank=True, null=True, verbose_name='关联-(user) 提交人')
+
+    class Meta:
+        verbose_name = '承包付款信息'
+        verbose_name_plural = verbose_name
 
 # 承包商
 class Outsourcer(BaseModel):
@@ -392,13 +407,13 @@ class ProjectTrace(BaseModel):
         blank=True, null=True,
     )
     outsourcer = models.SmallIntegerField(blank=True, null=True,
-        verbose_name='关联-(Outsourcer) 日报')
+        verbose_name='关联-(Outsourcer) 外包')
 
     worklog = models.SmallIntegerField(blank=True, null=True,
         verbose_name='关联-(WorkLog) 日报')
 
     task = models.SmallIntegerField(blank=True, null=True,
-        verbose_name='关联-(Task) 日报')
+        verbose_name='关联-(Task) 任务')
 
     subscriber = models.ManyToManyField(
         to='personnel.User',

@@ -55,17 +55,16 @@ class auth2APIView(APIView):
         # print(request.data)
         auth_requests = MyRequest()
         userId = auth_requests.get_user(request.data['code'])
-        # print(userId)
         user_obj =models.User.objects.filter(username=userId['usr']).first()
         if user_obj:
-            # print('用户存在')
+            print('用户存在')
             user_ser = serializers.AuthModelSerializer(instance=user_obj, data=userId)
             # 序列化类校验得到登录用户与token存放在序列化对象中
             user_ser.is_valid(raise_exception=True)
             user_ser.save()
         else:
-            # print('用户不存在')
             userInfo = auth_requests.get_info(userId['usr'])
+            print('用户不存在', userInfo)
             # 默认为普通用户，数据库内 2 普通用户
             userInfo['auth'] = [2]
             user_create = serializers.AuthCreateUserModelSerializer(data=userInfo)
@@ -90,9 +89,7 @@ class UserViewSet(ModelViewSet):
         # 拿到前台登录信息，交给序列化类，规则：帐号用usr传，密码用pwd传
         # 序列化类校验得到登录用户与token存放在序列化对象中
         # 取出登录用户与token返回给前
-
         user = serializers.UserModelSerializer(request.user, many=False).data
-
         return APIResponse(
             data_msg='get ok',
             results=user
@@ -221,6 +218,7 @@ class OverviewAreaViewSet(APIView):
                 res[v['department_id']] =  '%s %s' % (res[v['department_id']], v['user__name'])
             else:
                 res[v['department_id']] ='%s %s' % (v['department__name'], v['user__name'])
+        res_list = [{'id':key, 'title': value, 'group':value.split(' ')[0]} for key, value in res.items()]
         return APIResponse(
-            results=res
+            results=res_list
         )

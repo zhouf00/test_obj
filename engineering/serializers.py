@@ -92,7 +92,7 @@ class ProjectModelSerializer(serializers.ModelSerializer):
 class ProjectListModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Project
-        fields = ['id', 'name', 'serial', 'status','builders']
+        fields = ['id', 'name', 'serial', 'status','builders', 'manager', 'contract']
 
 
 # 项目删除的序列化
@@ -121,8 +121,15 @@ class ContractModelSerializer(serializers.ModelSerializer):
     class Meta:
         model = models.Contract
         fields = ['id', 'project', 'name', 'context', 'payment', 'payment_rate', 'delivery_time',
-                  'payment_time',
-                  'nameInfo']
+                  'payment_time','nameInfo', 'submitter']
+
+
+# 承包付款信息
+class PaymentModelSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = models.Payment
+        fields = '__all__'
 
 
 # 承包商序列化

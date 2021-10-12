@@ -24,12 +24,21 @@ class TaskViewSet(ModelViewSet):
     filter_class = filters.TaskFilter
     filter_backends = [SearchFilter, DjangoFilterBackend]
 
+    isleader = False
+
     def get_queryset(self):
         super().get_queryset()
         # 拿到管理员身份
         role = self.request.user.roleList
-        if '超级管理员' in role:
-            self.isleader = True
+        for var in role:
+            if '超级管理员' in var:
+                self.isleader = True
+                break
+            elif '日报管理' in var:
+                self.isleader = True
+                break
+        if self.isleader:
+            # self.isleader = True
             # print('你是管理员')
             pass
         else:
@@ -91,7 +100,7 @@ class TaskViewSet(ModelViewSet):
 
 class TaskListViewSet(ModelViewSet):
 
-    queryset = models.Task.objects.all().order_by('-create_time')
+    queryset = models.Task.objects.exclude(status=2).order_by('-create_time')
     serializer_class = serializers.TaskModelSerializer
 
     pagination_class = MyPageNumberPagination
@@ -130,8 +139,15 @@ class JournalViewSet(ModelViewSet):
         super().get_queryset()
         # 拿到管理员身份
         role = self.request.user.roleList
-        if '超级管理员' in role:
-            self.isleader = True
+        for var in role:
+            if '超级管理员' in var:
+                self.isleader = True
+                break
+            elif '日报管理' in var:
+                self.isleader = True
+                break
+        if self.isleader:
+            # self.isleader = True
             # print('你是管理员')
             pass
         else:
@@ -163,20 +179,19 @@ class JournalViewSet(ModelViewSet):
         projectLog_obj = e_models.ProjectTrace.objects.filter(is_delete=False)
         productionLog_obj = product_models.ProductionLog.objects.filter(is_delete=False)
         if instance:
-
             serializer = self.get_serializer(instance,many=True)
             res = serializer.data[0]
             res['project'] = project_id
             self.add_summary(res, projectLog_obj, productionLog_obj=productionLog_obj, project=project)
             if 'workList' not in res:
-                res['workList'] = [{'facilityList':[{}]}]
+                res['workList'] = []
         else:
+            # print('获取日报', res)
             res = {
                 'project': project_id,
                 'content':'',
                 'finish_time':'',
-                'workList': [{
-                    'facilityList': [{}]}]
+                'workList': []
             }
             self.add_summary(res, projectLog_obj, project=project, productionLog_obj=productionLog_obj)
 
@@ -205,13 +220,6 @@ class JournalViewSet(ModelViewSet):
 
     def create(self, request, *args, **kwargs):
         date = datetime.datetime.now()
-        if 'workList' in request.data and not request.data['workList'][0]:
-            # 未解决抛出异常，用API用代替
-            return APIResponse(
-                data_status='400',
-                data_msg='',
-                err='工作未填写'
-            )
 
         instance = self.queryset.filter(
             create_time__year=date.strftime('%Y'),
@@ -228,7 +236,7 @@ class JournalViewSet(ModelViewSet):
             serializer = self.get_serializer(data=request.data)
             serializer.is_valid(raise_exception=True)
             self.perform_create(serializer)
-
+        # print('日报打印',request.data)
         e = self.to_projectLog(request.data, serializer.data['id'])
         if e:
             return APIResponse(
@@ -238,37 +246,30 @@ class JournalViewSet(ModelViewSet):
             )
         else:
             self.pLog_save(request.data)
-            self.to_content(serializer.data, request.data)
         return APIResponse(
             data_msg='create ok',
             results=serializer.data,
         )
 
     def update(self, request, *args, **kwargs):
-        if 'workList' in request.data and not request.data['workList']:
-            # 未解决抛出异常，用API用代替
-            return APIResponse(
-                data_status='400',
-                data_msg='',
-                err='工作未填写'
-            )
-
         partial = kwargs.pop('partial', False)
         instance = self.get_object()
         serializer = self.get_serializer(instance, data=request.data, partial=partial)
         serializer.is_valid(raise_exception=True)
         self.perform_update(serializer)
 
+        # print('日报打印',request.data)
         e = self.to_projectLog(request.data, serializer.data['id'])
         if e:
             return APIResponse(
                 data_status='400',
                 data_msg='',
-                err='工作内容有误,%s' % e
+                err='工作内容有误, %s' % e
             )
         else:
+            pass
             self.pLog_save(request.data)
-            self.to_content(serializer.data, request.data)
+            # self.to_content(serializer.data, request.data)
         if getattr(instance, '_prefetched_objects_cache', None):
             # If 'prefetch_related' has been applied to a queryset, we need to
             # forcibly invalidate the prefetch cache on the instance.
@@ -288,7 +289,6 @@ class JournalViewSet(ModelViewSet):
     def to_projectLog(self, data, worklog):
         user = self.request.user.id
         date = datetime.datetime.now()
-
         # 关联信息
         # project = e_models.Project.objects.filter(is_delete=False)  # 项目
         facility_obj = e_models.Facility.objects.filter(is_delete=False)    # 设备
@@ -297,12 +297,16 @@ class JournalViewSet(ModelViewSet):
                 create_time__year=date.strftime('%Y'),
                 create_time__month=date.strftime('%m'),
                 create_time__day=date.strftime('%d'),)
+        productionLog_count = len(productionLog_obj)
         try:
+            new_log = []
             # 遍历工作
             for var in data['workList']:
+                if 'status' in var and not var['status']:
+                    var['status'] = None
                 # 判断是否有项目
-                # print('打印', var)
                 if 'project_id' in var and var['project_id']:
+                    # print('有项目',var)
                     var['project'] = var['project_id']
                     # 判断项目是否与定位相同
                     if 'project' in data and var['project'] == data['project']:
@@ -314,6 +318,7 @@ class JournalViewSet(ModelViewSet):
                                 data['ln_worklog'] = v_worklog
                             elif 'ln_worklog' in data and not data['ln_worklog']:
                                 data['ln_worklog'] = v_worklog
+                            self.queryset.filter(id=worklog).update(ln_worklog=v_worklog)
                         else:
                             var['user'] = user
                             var['worklog'] = worklog
@@ -322,7 +327,7 @@ class JournalViewSet(ModelViewSet):
                                 var['subscriber'] = []
                     else:
                         #
-                        if 'user_id'not in var:
+                        if 'user_id' not in var:
                             var['user'] = user
                         else:
                             var['user'] = var['user_id']
@@ -331,22 +336,24 @@ class JournalViewSet(ModelViewSet):
                         if 'subscriber' not in var:
                             var['subscriber'] = []
                 else:
-                    if 'id' in var and var['id'] and not var['project_id']:
-                        var.clear()
-                        continue
-                    data['content'] = var['facilityList'][0]['content']
+                    var['user'] = user
+                    var['worklog'] = worklog
+                    # print('无项目',var)
+                    if not 'id' in var:
+                        if 'project_id' not in var and 'task' not in var:
+                            var.clear()
                     continue
-                new_log = []
-                tmp_head = ''
                 tmp_content = ''
                 if 'content' not in var:
                     var['content'] = ''
                 else:
-                    var['content'] = var['content'].split('\t')[0]
+                    var['content'] = var['content'].split('|\t')[0]
+                if 'facilityList' not in var:
+                    # print('无设备')
+                    return
                 for v in var['facilityList']:
+                    # print('现场设备', v)
                     v['project'] = var['project']
-                    if not var['project']:
-                        tmp_content += ','.join(v['content'].strip())
                     v['user'] = var['user']
                     v['subscriber'] = var['subscriber']
                     v['worklog'] = var['worklog']
@@ -354,16 +361,17 @@ class JournalViewSet(ModelViewSet):
                     production = v['production'] if 'production' in v else None
                     if facility or production:
                         # print('有风机', v_worklog)
-                        self.to_productionLog(v, productionLog_obj.filter(worklog=v_worklog, project=v['project']), new_log)
-                        tmp_content += '\t设备：{facility}\n采集器：{production}\n描述：{content}\n'.format(
+                        to_obj = productionLog_obj.filter(worklog=v_worklog, project=v['project'])
+                        productionLog_count -= len(to_obj)
+                        self.to_productionLog(v, to_obj, new_log)
+                        tmp_content += '|\t设备：{facility}\n采集器：{production}\n描述：{content}\n'.format(
                             facility=facility_obj.filter(id=facility).first(),
                             production=production_obj.filter(id=production).first(),
                             content=v['content'])
-                    else:
-                        # print('没风机', v)
-                        tmp_head = v['content'].strip()
                 self.del_productionLog(productionLog_obj.filter(worklog=v_worklog, project=var['project']), new_log)
-                var['content'] = tmp_head+'\n'+tmp_content
+                var['content'] += '\n%s'%tmp_content
+            if 'workList' not in data or productionLog_count != 0:
+                self.del_productionLog(productionLog_obj.filter(user=user), new_log)
         except Exception as e:
             # print(e)
             return e
@@ -379,6 +387,7 @@ class JournalViewSet(ModelViewSet):
                 create_time__day=date.strftime('%d'),
         )
         new = []
+        # print('项目跟进保存', data['workList'])
         for var in data['workList']:
             if 'id' in var:
                 pLog_ser = e_serializers.ProjectTraceModelSerializer(instance=pLog_obj.filter(id=var['id']).first(), data=var)
@@ -392,9 +401,10 @@ class JournalViewSet(ModelViewSet):
                     if 'submitted' in data and data['submitted']:
                         test_messages(pLog_ser.data, project_obj, user_obj, self.request.user)
                     else:
-                        print(data['submitted'])
+                        pass
+                        # print(data['submitted'])
                 new.append(pLog_ser.data['id'])
-            else:
+            elif pLog_ser.errors:
                 return APIResponse(
                     data_status='400',
                     data_msg='',
@@ -410,7 +420,7 @@ class JournalViewSet(ModelViewSet):
 
     # 产品跟进保存
     def to_productionLog(self, v, obj, new=None):
-        # print('产品',obj)
+        # print('产品',obj, v)
         if 'id' in v:
             ser = product_serializers.ProductionLogModelSerializer(instance=obj.filter(id=v['id']).first(), data=v)
         else:
@@ -444,8 +454,9 @@ class JournalViewSet(ModelViewSet):
                 user = user_list.filter(id=var['user']).values('id', 'name').first()
                 var['userInfo'] = user if user else {}
                 content = projectTrace_list.filter(worklog__in=worklog_list).filter(
-                    Q(user=var['user'])|Q(subscriber=var['user'])).values('project','content')
-                content = ''.join(['<%s>\n\t %s'%(project.filter(id=v['project']).first(),v['content']) for v in content ])
+                    Q(user=var['user'])|Q(subscriber=var['user'])).values('project','content', 'outsourcer', 'task').distinct()
+                content = ''.join(['<%s-%s>\n\t %s'%
+                    (models.Task.objects.filter(id=v['task']).first(),project.filter(id=v['project']).first(),v['content']) for v in content ])
                 var['content'] = '%s %s'%(var['content'], content) if var['content'] else content
         else:
             if 'id' in data:
@@ -454,66 +465,116 @@ class JournalViewSet(ModelViewSet):
                 else:
                     worklog = [data['id']]
                 pt_obj = projectTrace_list.filter(worklog__in=worklog).values()
-                project_list = [v['project_id'] for v in pt_obj if v['project_id']]
+                # project_list = [v['project_id'] for v in pt_obj if v['project_id']]
                 workList = list(pt_obj)
-                workList += list(projectTrace_list.filter(
-                    create_time__year=date.strftime('%Y'),
-                    create_time__month=date.strftime('%m'),
-                    create_time__day=date.strftime('%d'),
-                    project=data['project'],
-                    worklog__isnull=False)
-                    .exclude(project__in=project_list).values())
+                # workList += list(projectTrace_list.filter(
+                #     create_time__year=date.strftime('%Y'),
+                #     create_time__month=date.strftime('%m'),
+                #     create_time__day=date.strftime('%d'),
+                #     project=data['project'],
+                #     worklog__isnull=False)
+                #     .exclude(project__in=project_list).values())
+                # if data['project']:
+                #     print('有项目',pt_obj)
+                    # workList = projectTrace_list.filter(
+                    #     create_time__year=date.strftime('%Y'),
+                    #     create_time__month=date.strftime('%m'),
+                    #     create_time__day=date.strftime('%d'),
+                    #     project=data['project'],
+                    #     worklog__isnull=False).exclude(project__in=project_list) | projectTrace_list.filter(worklog__in=worklog)
+                    # workList = workList.values()
+                    # print(workList)
+                # else:
+                #     print('无项目')
+                #     workList = []
                 if workList:
                     for var in workList:
-                        var['subscriber'] = [v['subscriber'] for v in
-                                                projectTrace_list.filter(worklog=var['worklog'], project=var['project_id']).values('subscriber')
-                                                if v['subscriber']]
-                # print(workList)
+                        var['subscriber'] = \
+                            [v['subscriber'] for v in
+                                projectTrace_list.filter(worklog=var['worklog'], project=var['project_id']).values('subscriber')
+                                if v['subscriber']]
             else:
                 if data['project']:
                     # print('无日志，有项目')
                     builders = [v['builders'] for v in project.filter(id=data['project']).values('builders')]
                     obj = projectTrace_list.filter(
-                    create_time__year=date.strftime('%Y'),
-                    create_time__month=date.strftime('%m'),
-                    create_time__day=date.strftime('%d'), project=data['project']).filter(
-                        Q(user__in=builders) | Q(subscriber=self.request.user.id))
+                        create_time__year=date.strftime('%Y'),
+                        create_time__month=date.strftime('%m'),
+                        create_time__day=date.strftime('%d'), project=data['project'])\
+                        .filter(Q(user__in=builders) | Q(subscriber=self.request.user.id)).distinct()
                     workList = list(obj.values())
                     if workList:
                         workList[0]['subscriber'] = [v['subscriber'] for v in
                                                  obj.values('subscriber')
                                                  if v['subscriber']]
+
+                    # print('日报',builders, obj, workList)
                 else:
                     return
             for var in workList:
-                headline = var['content'].split('\t')
+                if 'facilityList' not in var:
+                    var['facilityList'] = []
+                content = var['content'].split('|\t')
+                if len(content) > 0:
+                    var['content'] = content[0]
                 worklog = var['worklog']
-                content = productionLog_obj.filter(worklog=worklog, project=var['project_id']).values()
-                if not content and len(headline) > 0:
-                    # print('不存在')
-                    var['facilityList'] = [{
-                        'content': headline[0]
-                    }]
-                elif len(content) < len(headline):
-                    # print('存在')
-                    var['facilityList'] = [{
-                        'content': headline[0]
-                    }]
-                    var['facilityList'] += content
-                else:
-                    var['facilityList'] = content
-            if data['content']:
-                data['workList'] = [{'facilityList': [{'content': data['content']}]}] + workList
-            else:
-                data['workList'] = workList
-            if not data['workList'] and not workList:
-                data['workList'] = [{'facilityList': [{'content': data['content']}]}]
+                facilityList = productionLog_obj.filter(worklog=worklog, project=var['project_id']).values()
+                var['facilityList'] = facilityList
+            #     if not content and len(headline) > 0:
+            #         # print('不存在')
+            #         var['facilityList'] = [{
+            #             'content': headline[0]
+            #         }]
+            #     elif len(content) < len(headline):
+            #         # print('存在')
+            #         var['facilityList'] = [{
+            #             'content': headline[0]
+            #         }]
+            #         var['facilityList'] += content
+            #     else:
+            #         var['facilityList'] = content
+            # if data['content']:
+            #     data['workList'] = [{'facilityList': [{'content': data['content']}]}] + workList
+            # else:
+            #     data['workList'] = workList
+            # if not data['workList'] and not workList:
+            #     data['workList'] = [{'facilityList': [{'content': data['content']}]}]
+
+            data['workList'] = workList
+            # print('现场工作打印',workList)
 
 
 class SummarizingViewSet(ModelViewSet):
 
     queryset = models.WorkLogs.objects.all().order_by('user')
     serializer_class = serializers.JournalModelSerializer
+
+    filter_class = filters.JournalFilter
+    filter_backends = [SearchFilter, DjangoFilterBackend]
+
+    isleader = False
+
+    def get_users(self, users):
+        # 拿到管理员身份
+        role = self.request.user.roleList
+        for var in role:
+            if '超级管理员' in var:
+                self.isleader = True
+                break
+            elif '日报管理' in var:
+                self.isleader = True
+                break
+        if self.isleader:
+            # print('你是管理员')
+            pass
+        else:
+            # 拿到部门领导身份
+            if self.request.user.deptList:
+                users = users.filter(name__in=self.request.user.deptmembers[1]).distinct()
+            else:
+                users = users.filter(Q(name=self.request.user.name) |
+                                     Q(id=self.request.user.id)).distinct()
+        return users.values('id', 'name')
 
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
@@ -527,17 +588,26 @@ class SummarizingViewSet(ModelViewSet):
         #     return self.get_paginated_response(serializer.data)
         #
         # serializer = self.get_serializer(queryset, many=True)
-
+        query_params = request.query_params
+        if 'month' in query_params and query_params['month']:
+            month = query_params['month']
+        else:
+            month = None
         return APIResponse(
             data_msg='post ok',
-            results=self.to_month(users, queryset))
+            results=self.to_month(users, queryset, month))
 
     def to_month(self, users, data, time=None):
-        t = datetime.datetime.now()
+        if time:
+            t = datetime.datetime.strptime(time, "%Y-%m-%d")
+        else:
+            t = datetime.datetime.now()
         year = t.strftime('%Y')
         month = t.strftime('%m')
         days = (datetime.date(t.year,t.month+1,1)-datetime.timedelta(1)).day
         nano_dict = {v['id']:v['title'][0:1] for v in models.WorkStatus.objects.values('id','title')}
+        status_dict = {v['id']:{'title': v['title'], 'count':0} for v in models.WorkStatus.objects.values()}
+        status_dict['总人数'] = {'title': '总人数', 'count': 0}
         res_list = []
         default_tmp = {}
         for i in range(1, days + 1):
@@ -546,33 +616,20 @@ class SummarizingViewSet(ModelViewSet):
             tmp = {
                 'name': user['name']
             }
-            tmp.update(default_tmp)
             td = data.filter(
                 update_time__year= year,
                 update_time__month=month,
-                user=user['id']).order_by('-update_time').values('update_time__day','work_status')
+                user=user['id']).order_by('-update_time').values('update_time__month','update_time__day','work_status')
+            if td:
+                tmp.update(default_tmp)
+            else:
+                continue
             for var in td:
-                print('%d日'%var['update_time__day'], var['work_status'])
+                status_dict[var['work_status']]['count']+=1
                 tmp['%d日'%var['update_time__day']] = [ var['work_status'], nano_dict[var['work_status']] ]
             res_list.append(tmp)
-        return res_list
-
-    def get_users(self, users):
-        # 拿到管理员身份
-        role = self.request.user.roleList
-        if '超级管理员' in role:
-            # print('你是管理员')
-            pass
-        elif '普通用户'in role and len(role)>1:
-            pass
-        else:
-            # 拿到部门领导身份
-            if self.request.user.deptList:
-                users = users.filter(name__in=self.request.user.deptmembers[1]).distinct()
-            else:
-                users = users.filter(Q(name=self.request.user.name) |
-                                     Q(id=self.request.user.id)).distinct()
-        return users.values('id', 'name')
+            status_dict['总人数']['count'] +=1
+        return res_list, status_dict
 
 
 # 不用

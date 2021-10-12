@@ -115,7 +115,7 @@ DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.mysql',
 #         'NAME': 'windit',
-#         'HOST': '10.100.0.150',
+#         'HOST': '10.100.0.151',
 #         'PORT': 33060,
 #         'USER': 'root',
 #         'PASSWORD':'test',
@@ -187,8 +187,8 @@ MEDIA_URL = '/api/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 # 企业微信使用
-# WX_TOKEN = ''
-WX_TOKEN = 'DoMTMrz9cQwUQM8zVyanvw_Syk2EZNuGepLun-Hz5NFFb0f5Srkwh4V2306DSjosa24vjduqyCxJIakP27vgqHp-7RIp6YKiti4t-j_DAMxCaa9aE2i49Y9bklmDJjylm-jMOA8_8keGMf8JRjbAwtHa4izD-I_gIgdraphW7oDJUBwBv0Vq41f7QMgl3DUal-DyljLhxtNt6nbwcpJJDA'
+WX_TOKEN = ''
+# WX_TOKEN = 'DoMTMrz9cQwUQM8zVyanvw_Syk2EZNuGepLun-Hz5NFFb0f5Srkwh4V2306DSjosa24vjduqyCxJIakP27vgqHp-7RIp6YKiti4t-j_DAMxCaa9aE2i49Y9bklmDJjylm-jMOA8_8keGMf8JRjbAwtHa4izD-I_gIgdraphW7oDJUBwBv0Vq41f7QMgl3DUal-DyljLhxtNt6nbwcpJJDA'
 WX_JSAPITICKET = {
     'token': '',
     'ticket': ''
